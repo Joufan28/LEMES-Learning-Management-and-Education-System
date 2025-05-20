@@ -4,51 +4,65 @@ import bodyParser from "body-parser";
 import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
-import { sequelize, initializeDatabase } from "./models/courseModel";
-
-/* ROUTE IMPORTS */
+import * as dynamoose from "dynamoose";
+// import serverless from "serverless-http";
+// import seed from "./seed/seedDynamodb";
+// import { clerkMiddleware, createClerkClient, requireAuth } from "@clerk/express";
+// /* ROUTE IMPORTS */
 import courseRoutes from "./routes/courseRoutes";
+// import userClerkRoutes from "./routes/userClerkRoutes";
+// import transactionRoutes from "./routes/transactionRoutes";
+// import userCourseProgressRoutes from "./routes/userCourseProgressRoutes";
 
 /* CONFIGURATIONS */
 dotenv.config();
 const isProduction = process.env.NODE_ENV === "production";
+if (!isProduction) {
+  dynamoose.aws.ddb.local();
+}
+
+// export const clerkClient = createClerkClient({
+//   secretKey: process.env.CLERK_SECRET_KEY,
+// });
 
 const app = express();
-
-// Middleware
 app.use(express.json());
 app.use(helmet());
 app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" }));
 app.use(morgan("common"));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(
-  cors({
-    origin: process.env.CORS_ORIGIN || "*",
-    credentials: true,
-  })
-);
+app.use(cors());
+// app.use(clerkMiddleware());
 
-// Routes
+/* ROUTES */
 app.get("/", (req, res) => {
   res.send("Hello World");
 });
 
 app.use("/courses", courseRoutes);
+// app.use("/users/clerk", requireAuth(), userClerkRoutes);
+// app.use("/transactions", requireAuth(), transactionRoutes);
+// app.use("/users/course-progress", requireAuth(), userCourseProgressRoutes);
 
-// Database connection and server start
-const startServer = async () => {
-  try {
-    await initializeDatabase();
+/* SERVER */
+const port = process.env.PORT || 3000;
+if (!isProduction) {
+  app.listen(port, () => {
+    console.log(`Server running on port ${port}`);
+  });
+}
 
-    const port = process.env.PORT || 3000;
-    app.listen(port, () => {
-      console.log(`Server running on port ${port}`);
-    });
-  } catch (error) {
-    console.error("Failed to initialize server:", error);
-    process.exit(1);
-  }
-};
-
-startServer();
+// aws production environment
+// const serverlessApp = serverless(app);
+// export const handler = async (event: any, context: any) => {
+//   if (event.action === "seed") {
+//     await seed();
+//     return {
+//       statusCode: 200,
+//       body: JSON.stringify({ message: "Data seeded successfully" }),
+//     };
+//   } else {
+//     return serverlessApp(event, context);
+//   }
+// };
