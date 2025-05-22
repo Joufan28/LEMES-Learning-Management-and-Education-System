@@ -2,12 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { DM_Sans } from "next/font/google";
 import Providers from "./providers";
-
-// const geistSans = localFont({
-//   src: "./fonts/GeistVF.woff",
-//   variable: "--font-geist-sans",
-//   weight: "100 900",
-// });
+import { ClerkProvider } from "@clerk/nextjs";
 
 const dmSans = DM_Sans({
   variable: "--font-dm-sans",
@@ -26,12 +21,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${dmSans.className}`}>
-        <div className="root-layout">
-          <Providers>{children}</Providers>
-        </div>
-      </body>
-    </html>
+    <ClerkProvider>
+      <html lang="en">
+        <body className={`${dmSans.className}`}>
+          <div className="root-layout">
+            <Providers>{children}</Providers>
+          </div>
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }

@@ -47,8 +47,8 @@ const Landing = () => {
   const router = useRouter();
   const currentImage = useCarousel({ totalImages: 3 });
   const { data, isLoading, isError } = useGetCoursesQuery({});
-  const courses = data?.data ?? []; // default ke array kosong jika belum ready
-  console.log("ini beneran array", courses);
+  const courses = data?.data ?? [];
+  console.log(courses);
 
   if (isLoading) return <LoadingSkeleton />;
 
