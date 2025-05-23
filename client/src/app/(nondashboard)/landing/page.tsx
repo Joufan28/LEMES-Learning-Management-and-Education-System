@@ -48,13 +48,15 @@ const Landing = () => {
   const currentImage = useCarousel({ totalImages: 3 });
   const { data, isLoading, isError } = useGetCoursesQuery({});
   const courses = data?.data ?? [];
-  console.log(courses);
+  console.log("Courses data:", data);
 
   if (isLoading) return <LoadingSkeleton />;
+  if (isError) return <div>Failed to fetch courses</div>;
 
   const handleCourseClick = (courseId: string) => {
     router.push(`/search?id=${courseId}`);
   };
+
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }} className="landing">
       <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.5 }} className="landing__hero">
