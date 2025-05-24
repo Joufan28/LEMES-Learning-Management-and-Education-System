@@ -50,7 +50,7 @@ const express_2 = require("@clerk/express");
 // /* ROUTE IMPORTS */
 const courseRoutes_1 = __importDefault(require("./routes/courseRoutes"));
 const userClerkRoutes_1 = __importDefault(require("./routes/userClerkRoutes"));
-// import transactionRoutes from "./routes/transactionRoutes";
+const transactionRoutes_1 = __importDefault(require("./routes/transactionRoutes"));
 // import userCourseProgressRoutes from "./routes/userCourseProgressRoutes";
 /* CONFIGURATIONS */
 dotenv_1.default.config();
@@ -76,7 +76,7 @@ app.get("/", (req, res) => {
 });
 app.use("/courses", courseRoutes_1.default);
 app.use("/users/clerk", (0, express_2.requireAuth)(), userClerkRoutes_1.default);
-// app.use("/transactions", requireAuth(), transactionRoutes);
+app.use("/transactions", (0, express_2.requireAuth)(), transactionRoutes_1.default);
 // app.use("/users/course-progress", requireAuth(), userCourseProgressRoutes);
 /* SERVER */
 const port = process.env.PORT || 3000;

@@ -3,6 +3,14 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { FileText } from "lucide-react";
 
 const AccordionSections = ({ sections }: AccordionSectionsProps) => {
+  if (!sections || sections.length === 0) {
+    return (
+      <div className="text-sm text-customgreys-dirtyGrey">
+        No sections available for this course.
+      </div>
+    );
+  }
+
   return (
     <Accordion type="multiple" className="w-full">
       {sections.map((section) => (
@@ -12,7 +20,7 @@ const AccordionSections = ({ sections }: AccordionSectionsProps) => {
           </AccordionTrigger>
           <AccordionContent className="accordion-section__content">
             <ul>
-              {section.chapters.map((chapter) => (
+              {section.chapters?.map((chapter) => (
                 <li key={chapter.chapterId} className="accordion-section__chapter">
                   <FileText className="mr-2 w-4 h-4" />
                   <span className="text-sm">{chapter.title}</span>
