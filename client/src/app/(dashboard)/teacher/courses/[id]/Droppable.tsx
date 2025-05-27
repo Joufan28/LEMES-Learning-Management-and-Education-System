@@ -38,7 +38,9 @@ export default function DroppableComponent() {
     const updatedChapters = [...updatedSections[sectionIndex].chapters];
     const [reorderedChapter] = updatedChapters.splice(startIndex, 1);
     updatedChapters.splice(endIndex, 0, reorderedChapter);
-    updatedSections[sectionIndex].chapters = updatedChapters;
+    
+    // Create a mutable copy of the section object before updating chapters
+    updatedSections[sectionIndex] = { ...updatedSections[sectionIndex], chapters: updatedChapters };
     dispatch(setSections(updatedSections));
   };
 

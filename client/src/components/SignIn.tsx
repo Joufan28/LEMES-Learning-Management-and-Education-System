@@ -18,7 +18,9 @@ const SignInComponent = () => {
       return `/checkout?step=2&id=${courseId}&showSignUp=true`;
     }
 
+    // Determine redirect based on user role after sign-in
     const userType = user?.publicMetadata?.userType as string;
+    console.log("Redirecting after sign in, userType:", userType);
     if (userType === "teacher") {
       return "/teacher/courses";
     }
@@ -47,7 +49,7 @@ const SignInComponent = () => {
         },
       }}
       signUpUrl={signUpUrl}
-      forceRedirectUrl={getRedirectUrl()}
+      afterSignInUrl={getRedirectUrl()}
       routing="hash"
       afterSignOutUrl="/"
     />

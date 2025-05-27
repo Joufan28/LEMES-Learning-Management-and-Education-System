@@ -6,24 +6,26 @@ import { Bell, BookOpen } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 
-export default function NonDashboardNavbar() {
+const NonDashboardNavbar = () => {
   const { user } = useUser();
   const userRole = user?.publicMetadata?.userType as "student" | "teacher";
-  console.log("user?.publicMetadata?.userType", user?.publicMetadata?.userType);
+
+  console.log("User role", userRole);
+
   return (
     <nav className="nondashboard-navbar">
       <div className="nondashboard-navbar__container">
         <div className="nondashboard-navbar__search">
-          <Link href="/" className="nondashboard-navbar__brand">
+          <Link href="/" className="nondashboard-navbar__brand" scroll={false}>
             LEMES
           </Link>
-          <div className="d=felx item-center gap-4">
+          <div className="flex items-center gap-4">
             <div className="relative group">
-              <Link href="/search" className="nondashboard-navbar__search-input">
-                <span className="hidden sm:inline">Search Course</span>
+              <Link href="/search" className="nondashboard-navbar__search-input" scroll={false}>
+                <span className="hidden sm:inline">Search Courses</span>
                 <span className="sm:hidden">Search</span>
               </Link>
-              <BookOpen className="nondashboard-navbar__search-icon" size="18" />
+              <BookOpen className="nondashboard-navbar__search-icon" size={18} />
             </div>
           </div>
         </div>
@@ -33,7 +35,6 @@ export default function NonDashboardNavbar() {
             <Bell className="nondashboard-navbar__notification-icon" />
           </button>
 
-          {/* SIGN IN BUTTONS */}
           <SignedIn>
             <UserButton
               appearance={{
@@ -49,15 +50,17 @@ export default function NonDashboardNavbar() {
             />
           </SignedIn>
           <SignedOut>
-            <Link href="/signin" className="nondashboard-navbar__auth-button--login">
-              Log In
+            <Link href="/signin" className="nondashboard-navbar__auth-button--login" scroll={false}>
+              Log in
             </Link>
-            <Link href="/signup" className="nondashboard-navbar__auth-button--signup">
-              Sign Up
+            <Link href="/signup" className="nondashboard-navbar__auth-button--signup" scroll={false}>
+              Sign up
             </Link>
           </SignedOut>
         </div>
       </div>
     </nav>
   );
-}
+};
+
+export default NonDashboardNavbar;

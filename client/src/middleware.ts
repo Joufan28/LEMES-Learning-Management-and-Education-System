@@ -8,6 +8,14 @@ export default clerkMiddleware(async (auth, req) => {
   const { sessionClaims } = await auth();
   const userRole = (sessionClaims?.metadata as { userType: "student" | "teacher" })?.userType || "student";
 
+  console.log("Middleware - Path:", req.nextUrl.pathname, "Role:", userRole);
+
+  // Allow access to the dashboard redirect page for authenticated users
+  if (req.nextUrl.pathname === "/dashboard-redirect") {
+    // No redirect needed, let the page handle it
+    return NextResponse.next();
+  }
+
   if (isStudentRoute(req)) {
     if (userRole !== "student") {
       const url = new URL("/teacher/courses", req.url);
