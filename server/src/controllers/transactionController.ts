@@ -55,12 +55,22 @@ export const createStripePaymentIntent = async (req: Request, res: Response): Pr
 
 export const createTransaction = async (req: Request, res: Response): Promise<void> => {
   const { userId, courseId, transactionId, amount, paymentProvider } = req.body;
+  console.log("Creating transaction with data:", { userId, courseId, transactionId, amount, paymentProvider });
 
   try {
     // 1. get course info
+    console.log("Fetching course info for courseId:", courseId);
     const course = await Course.get(courseId);
+    console.log("Course info:", course);
+
+    if (!course) {
+      console.error("Course not found:", courseId);
+      res.status(404).json({ message: "Course not found" });
+      return;
+    }
 
     // 2. create transaction record
+    console.log("Creating transaction record...");
     const newTransaction = new Transaction({
       dateTime: new Date().toISOString(),
       userId,
@@ -70,8 +80,10 @@ export const createTransaction = async (req: Request, res: Response): Promise<vo
       paymentProvider,
     });
     await newTransaction.save();
+    console.log("Transaction record created:", newTransaction);
 
     // 3. create initial course progress
+    console.log("Creating initial course progress...");
     const initialProgress = new UserCourseProgress({
       userId,
       courseId,
@@ -87,8 +99,10 @@ export const createTransaction = async (req: Request, res: Response): Promise<vo
       lastAccessedTimestamp: new Date().toISOString(),
     });
     await initialProgress.save();
+    console.log("Initial course progress created:", initialProgress);
 
     // 4. add enrollment to relevant course
+    console.log("Adding user to course enrollments...");
     await Course.update(
       { courseId },
       {
@@ -97,6 +111,7 @@ export const createTransaction = async (req: Request, res: Response): Promise<vo
         },
       }
     );
+    console.log("User added to course enrollments");
 
     res.json({
       message: "Purchased Course successfully",
@@ -106,6 +121,7 @@ export const createTransaction = async (req: Request, res: Response): Promise<vo
       },
     });
   } catch (error) {
+    console.error("Error in createTransaction:", error);
     res.status(500).json({ message: "Error creating transaction and enrollment", error });
   }
 };

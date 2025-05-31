@@ -1,7 +1,10 @@
 import { Request, Response } from "express";
 import Course from "../models/courseModel";
+import AWS from "aws-sdk";
 import { v4 as uuidv4 } from "uuid";
 import { getAuth } from "@clerk/express";
+
+const s3 = new AWS.S3();
 
 export const listCourses = async (req: Request, res: Response): Promise<void> => {
   const { category } = req.query;
@@ -31,8 +34,9 @@ export const getCourse = async (req: Request, res: Response): Promise<void> => {
 export const createCourse = async (req: Request, res: Response): Promise<void> => {
   try {
     const { teacherId, teacherName } = req.body;
+
     if (!teacherId || !teacherName) {
-      res.status(400).json({ message: "Teacher id and Teacher Name are required" });
+      res.status(400).json({ message: "Teacher Id and name are required" });
       return;
     }
 
@@ -130,5 +134,36 @@ export const deleteCourse = async (req: Request, res: Response): Promise<void> =
     res.json({ message: "Course deleted successfully", data: course });
   } catch (error) {
     res.status(500).json({ message: "Error deleting course", error });
+  }
+};
+
+export const getUploadVideoUrl = async (req: Request, res: Response): Promise<void> => {
+  const { fileName, fileType } = req.body;
+
+  if (!fileName || !fileType) {
+    res.status(400).json({ message: "File name and type are required" });
+    return;
+  }
+
+  try {
+    const uniqueId = uuidv4();
+    const s3Key = `videos/${uniqueId}/${fileName}`;
+
+    const s3Params = {
+      Bucket: process.env.S3_BUCKET_NAME || "",
+      Key: s3Key,
+      Expires: 60,
+      ContentType: fileType,
+    };
+
+    const uploadUrl = s3.getSignedUrl("putObject", s3Params);
+    const videoUrl = `${process.env.CLOUDFRONT_DOMAIN}/videos/${uniqueId}/${fileName}`;
+
+    res.json({
+      message: "Upload URL generated successfully",
+      data: { uploadUrl, videoUrl },
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Error generating upload URL", error });
   }
 };

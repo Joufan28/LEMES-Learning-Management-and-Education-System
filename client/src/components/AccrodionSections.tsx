@@ -4,11 +4,7 @@ import { FileText } from "lucide-react";
 
 const AccordionSections = ({ sections }: AccordionSectionsProps) => {
   if (!sections || sections.length === 0) {
-    return (
-      <div className="text-sm text-customgreys-dirtyGrey">
-        No sections available for this course.
-      </div>
-    );
+    return <div className="text-sm text-customgreys-dirtyGrey">No sections available for this course.</div>;
   }
 
   return (

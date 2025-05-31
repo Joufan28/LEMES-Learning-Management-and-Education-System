@@ -67,7 +67,7 @@ const CourseEditor = () => {
       }).unwrap();
 
       refetch();
-      router.push('/teacher/courses');
+      router.push("/teacher/courses");
     } catch (error) {
       console.error("Failed to update course:", error);
     }

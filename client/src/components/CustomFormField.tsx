@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
+import { CustomSwitch } from "@/components/ui/custom-switch";
 import { Edit, X, Plus } from "lucide-react";
 import { registerPlugin } from "filepond";
 import { FilePond } from "react-filepond";
@@ -57,12 +57,14 @@ export const CustomFormField: React.FC<FormFieldProps> = ({ name, label, type = 
         );
       case "switch":
         return (
-          <div className="flex items-center space-x-2">
-            <Switch checked={field.value} onCheckedChange={field.onChange} id={name} className={`text-customgreys-dirtyGrey ${inputClassName}`} />
-            <FormLabel htmlFor={name} className={labelClassName}>
-              {label}
-            </FormLabel>
-          </div>
+          <CustomSwitch
+            checked={Boolean(field.value)}
+            onChange={(e) => field.onChange(e.target.checked)}
+            id={name}
+            label={label}
+            labelClassName={labelClassName}
+            className={inputClassName}
+          />
         );
       case "file":
         const ACCEPTED_VIDEO_TYPES = ["video/mp4", "video/webm", "video/ogg"];

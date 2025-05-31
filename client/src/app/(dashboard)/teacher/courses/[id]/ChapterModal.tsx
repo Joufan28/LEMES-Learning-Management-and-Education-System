@@ -56,7 +56,12 @@ const ChapterModal = () => {
       title: data.title,
       content: data.content,
       type: data.video ? "Video" : "Text",
-      video: data.video,
+      video: typeof data.video === "string" ? data.video : undefined,
+      videoFile: data.video instanceof File ? {
+        name: data.video.name,
+        type: data.video.type,
+        size: data.video.size
+      } : undefined
     };
 
     if (selectedChapterIndex === null) {

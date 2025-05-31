@@ -3,6 +3,7 @@ import { twMerge } from "tailwind-merge";
 import * as z from "zod";
 import { api } from "../state/api";
 import { toast } from "sonner";
+import { Chapter } from "./schemas";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -299,15 +300,17 @@ export const createCourseFormData = (
   formData.append("price", data.coursePrice.toString());
   formData.append("status", data.courseStatus ? "Published" : "Draft");
 
-  const sectionsWithVideos = sections.map((section) => ({
+  // Create a serializable version of sections without File objects
+  const serializableSections = sections.map((section) => ({
     ...section,
     chapters: section.chapters.map((chapter) => ({
       ...chapter,
-      video: chapter.video,
+      video: typeof chapter.video === "string" ? chapter.video : undefined,
+      videoFile: chapter.videoFile
     })),
   }));
 
-  formData.append("sections", JSON.stringify(sectionsWithVideos));
+  formData.append("sections", JSON.stringify(serializableSections));
 
   return formData;
 };

@@ -74,7 +74,7 @@ const PaymentPageContent = () => {
 
         {/* Pyament Form */}
         <div className="payment__form-container">
-          <form id="payment-form" onSubmit={handleSubmit} className="payment__form">
+          <form id="payment-form" onSubmit={handleSubmit} className="border border-blue-200 payment__form">
             <div className="payment__content">
               <h1 className="payment__title">Checkout</h1>
               <p className="payment__subtitle">Fill out the payment details below to complete your purchase.</p>

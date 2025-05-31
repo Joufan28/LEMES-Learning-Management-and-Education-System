@@ -62,10 +62,19 @@ const createStripePaymentIntent = (req, res) => __awaiter(void 0, void 0, void 0
 exports.createStripePaymentIntent = createStripePaymentIntent;
 const createTransaction = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { userId, courseId, transactionId, amount, paymentProvider } = req.body;
+    console.log("Creating transaction with data:", { userId, courseId, transactionId, amount, paymentProvider });
     try {
         // 1. get course info
+        console.log("Fetching course info for courseId:", courseId);
         const course = yield courseModel_1.default.get(courseId);
+        console.log("Course info:", course);
+        if (!course) {
+            console.error("Course not found:", courseId);
+            res.status(404).json({ message: "Course not found" });
+            return;
+        }
         // 2. create transaction record
+        console.log("Creating transaction record...");
         const newTransaction = new transactionModel_1.default({
             dateTime: new Date().toISOString(),
             userId,
@@ -75,7 +84,9 @@ const createTransaction = (req, res) => __awaiter(void 0, void 0, void 0, functi
             paymentProvider,
         });
         yield newTransaction.save();
+        console.log("Transaction record created:", newTransaction);
         // 3. create initial course progress
+        console.log("Creating initial course progress...");
         const initialProgress = new userCourseProgressModel_1.default({
             userId,
             courseId,
@@ -91,12 +102,15 @@ const createTransaction = (req, res) => __awaiter(void 0, void 0, void 0, functi
             lastAccessedTimestamp: new Date().toISOString(),
         });
         yield initialProgress.save();
+        console.log("Initial course progress created:", initialProgress);
         // 4. add enrollment to relevant course
+        console.log("Adding user to course enrollments...");
         yield courseModel_1.default.update({ courseId }, {
             $ADD: {
                 enrollments: [{ userId }],
             },
         });
+        console.log("User added to course enrollments");
         res.json({
             message: "Purchased Course successfully",
             data: {
@@ -106,6 +120,7 @@ const createTransaction = (req, res) => __awaiter(void 0, void 0, void 0, functi
         });
     }
     catch (error) {
+        console.error("Error in createTransaction:", error);
         res.status(500).json({ message: "Error creating transaction and enrollment", error });
     }
 });

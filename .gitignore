@@ -1,7 +1,19 @@
-# client
-/client/node_modules
-/client/.env
+**/node_modules/
+**/dist/
 
-# server
-/server/node_modules
-/server/.env
+.env
+client/.env.local
+client/.env.development
+client/.env.production
+server/.env
+
+client/.next/
+
+.DS_Store
+Thumbs.db
+
+.vscode/
+
+server/shared-local-instance.db
+server/dynamodb-local-metadata.json
+shared-local-instance.db
