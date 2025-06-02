@@ -2,8 +2,29 @@ import AccordionSections from "@/components/AccrodionSections";
 import { Button } from "@/components/ui/button";
 import { formatPrice } from "@/lib/utils";
 import React from "react";
+import { useUser } from "@clerk/nextjs";
+import { useGetUserEnrolledCoursesQuery } from "@/state/api";
+import { Course } from "@/types";
 
-const SelectedCourse = ({ course, handleEnrollNow }) => {
+interface SelectedCourseProps {
+  course: Course;
+  handleEnrollNow: (courseId: string) => void;
+}
+
+const SelectedCourse: React.FC<SelectedCourseProps> = ({ course, handleEnrollNow }) => {
+  const { user, isLoaded } = useUser();
+  const userId = user?.id;
+  const userRole = user?.publicMetadata?.userType as "student" | "teacher" | undefined;
+
+  const { data: enrolledCoursesData, isLoading: isLoadingEnrolledCourses } = useGetUserEnrolledCoursesQuery(userId as string, {
+    skip: !userId || !isLoaded
+  });
+  const enrolledCourses = enrolledCoursesData?.data || [];
+
+  const isOwnedByTeacher = userRole === "teacher" && course.teacherId === userId;
+  const isAlreadyEnrolled = enrolledCourses.some((enrolledCourse: Course) => enrolledCourse.courseId === course.courseId);
+  const disableEnroll = isOwnedByTeacher || isAlreadyEnrolled;
+
   return (
     <div className="selected-course">
       <div>
@@ -24,8 +45,12 @@ const SelectedCourse = ({ course, handleEnrollNow }) => {
 
         <div className="selected-course__footer">
           <span className="selected-course__price">{formatPrice(course.price)}</span>
-          <Button onClick={() => handleEnrollNow(course.courseId)} className="bg-primary-700 hover:bg-primary-600">
-            Enroll Now
+          <Button
+            onClick={() => handleEnrollNow(course.courseId)}
+            className="bg-primary-700 hover:bg-primary-600"
+            disabled={disableEnroll}
+          >
+            {disableEnroll ? (isOwnedByTeacher ? 'Your Course' : 'Already Enrolled') : 'Enroll Now'}
           </Button>
         </div>
       </div>

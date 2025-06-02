@@ -15,6 +15,13 @@ interface Course {
   title: string;
   category: string;
   teacherId: string;
+  teacherName: string;
+  teacherBio?: string;
+  teacherJob?: string;
+  image?: string;
+  status: "Published" | "Draft";
+  enrollments?: any[]; // simplified
+  sections?: { chapters: { chapterId: string }[] }[]; // simplified to get first chapter
 }
 
 const Courses = () => {
@@ -30,7 +37,7 @@ const Courses = () => {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [availableCategories, setAvailableCategories] = useState<string[]>([]);
 
-  // Ekstrak kategori yang tersedia dari data kursus
+  // Extract available categories from course data
   useEffect(() => {
     if (courses.length > 0) {
       const uniqueCategories = new Set<string>();
@@ -45,27 +52,24 @@ const Courses = () => {
     }
   }, [courses]);
 
-  // Fungsi filter yang diperbaiki dengan penanganan error
+  // Filter courses based on search and filter options
   const filteredCourses = useMemo(() => {
     if (!courses || courses.length === 0) return [];
 
     try {
-      // Normalisasi teks pencarian dengan penanganan null/undefined
       const normalizedSearch = (searchTerm || "").trim().toLowerCase();
 
       return courses.filter((course: Course) => {
-        // Pastikan title ada sebelum memanggil toLowerCase()
         const title = course.title || "";
         const matchesSearch = normalizedSearch ? title.toLowerCase().includes(normalizedSearch) : true;
 
-        // Normalisasi kategori
         const normalizedCategory = selectedCategory === "all" ? true : course.category.toLowerCase() === selectedCategory.toLowerCase();
 
         return matchesSearch && normalizedCategory;
       });
     } catch (error) {
       console.error("Error filtering courses:", error);
-      return courses; // Fallback ke semua kursus jika terjadi error
+      return courses; // Fallback to all courses if error occurs
     }
   }, [courses, searchTerm, selectedCategory]);
 
@@ -82,35 +86,70 @@ const Courses = () => {
   const handleCreateCourse = async () => {
     if (!user) return;
 
+    const metadata = user.publicMetadata as { bio?: string; job?: string };
+
     const result = await createCourse({
       teacherId: user.id,
       teacherName: user.fullName || "Unknown Teacher",
+      teacherBio: metadata?.bio || "",
+      teacherJob: metadata?.job || "",
     }).unwrap();
 
     router.push(`/teacher/courses/${result.courseId}`);
+  };
+
+  const handleViewCourse = (course: Course) => {
+    console.log("Attempting to view course:", course.courseId);
+    console.log("Course object:", course);
+    if (course.sections && course.sections.length > 0 && course.sections[0].chapters && course.sections[0].chapters.length > 0) {
+      const firstChapterId = course.sections[0].chapters[0].chapterId;
+      console.log("Found first chapter ID:", firstChapterId);
+      const viewUrl = `/user/courses/${course.courseId}/chapters/${firstChapterId}?viewAsTeacher=true`;
+      console.log("Navigating to:", viewUrl);
+      router.push(viewUrl);
+    } else {
+      console.log("Course has no sections or chapters to view.", course.courseId);
+      // Optionally handle courses with no chapters, e.g., navigate to a basic course page or show a message
+      // router.push(`/user/courses/${course.courseId}?viewAsTeacher=true`); // Example if a basic page exists
+    }
   };
 
   if (isLoading) return <Loading />;
   if (isError) return <div>Error loading courses.</div>;
 
   return (
-    <div className="teacher-courses">
-      <Header title="Courses" subtitle="Browse your courses" rightElement={<Button onClick={handleCreateCourse}>Create Course</Button>} />
+    <div className="teacher-courses container">
+      <Header title="Courses" subtitle="Browse your courses" rightElement={<Button onClick={handleCreateCourse} className="teacher-courses__header">Create Course</Button>} />
 
       <Toolbar onSearch={setSearchTerm} onCategoryChange={setSelectedCategory} searchValue={searchTerm} selectedCategory={selectedCategory} categories={availableCategories} />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
-        {filteredCourses.length > 0 ? (
-          filteredCourses.map((course) => <TeacherCourseCard key={course.courseId} course={course} onEdit={() => handleEdit(course)} onDelete={() => handleDelete(course.courseId)} isOwner={course.teacherId === user?.id} />)
-        ) : (
-          <div className="col-span-full text-center py-12">
-            <p className="text-gray-500 text-lg">No courses found</p>
-            <Button className="mt-4" onClick={handleCreateCourse}>
-              Create Your First Course
-            </Button>
-          </div>
-        )}
-      </div>
+      {filteredCourses.length === 0 ? (
+        <div className="text-center py-12">
+          <h3 className="text-lg font-medium mb-4">No courses match your filters</h3>
+          <button
+            onClick={() => {
+              setSearchTerm("");
+              setSelectedCategory("all");
+            }}
+            className="text-blue-600 hover:text-blue-800 font-medium"
+          >
+            Clear filters
+          </button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+          {filteredCourses.map((course) => (
+            <TeacherCourseCard
+              key={course.courseId}
+              course={course}
+              onEdit={() => handleEdit(course)}
+              onDelete={() => handleDelete(course.courseId)}
+              isOwner={course.teacherId === user?.id}
+              onViewCourse={() => handleViewCourse(course)}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 };

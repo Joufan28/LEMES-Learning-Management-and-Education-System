@@ -25,6 +25,8 @@ const ChapterModal = () => {
       title: "",
       content: "",
       video: "",
+      quizQuestions: [],
+      resourceLinks: [],
     },
   });
 
@@ -34,12 +36,16 @@ const ChapterModal = () => {
         title: chapter.title,
         content: chapter.content,
         video: chapter.video || "",
+        quizQuestions: chapter.quizQuestions || [],
+        resourceLinks: chapter.resourceLinks || [],
       });
     } else {
       methods.reset({
         title: "",
         content: "",
         video: "",
+        quizQuestions: [],
+        resourceLinks: [],
       });
     }
   }, [chapter, methods]);
@@ -61,7 +67,9 @@ const ChapterModal = () => {
         name: data.video.name,
         type: data.video.type,
         size: data.video.size
-      } : undefined
+      } : undefined,
+      quizQuestions: data.quizQuestions,
+      resourceLinks: data.resourceLinks,
     };
 
     if (selectedChapterIndex === null) {
@@ -100,6 +108,20 @@ const ChapterModal = () => {
             <CustomFormField name="title" label="Chapter Title" placeholder="Write chapter title here" />
 
             <CustomFormField name="content" label="Chapter Content" type="textarea" placeholder="Write chapter content here" />
+
+            <CustomFormField
+              name="quizQuestions"
+              label="Quiz Questions"
+              type="multi-input"
+              placeholder="Add a quiz question"
+            />
+
+            <CustomFormField
+              name="resourceLinks"
+              label="Resource Links"
+              type="multi-input"
+              placeholder="Add a resource link"
+            />
 
             <FormField
               control={methods.control}

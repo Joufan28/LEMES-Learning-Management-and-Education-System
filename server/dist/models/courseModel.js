@@ -44,6 +44,16 @@ const chapterSchema = new dynamoose_1.Schema({
     video: {
         type: String,
     },
+    quizQuestions: {
+        type: Array,
+        schema: [String],
+        default: [],
+    },
+    resourceLinks: {
+        type: Array,
+        schema: [String],
+        default: [],
+    },
 });
 const sectionSchema = new dynamoose_1.Schema({
     sectionId: {
@@ -75,6 +85,18 @@ const courseSchema = new dynamoose_1.Schema({
     teacherName: {
         type: String,
         required: true,
+    },
+    teacherBio: {
+        type: String,
+        default: "",
+    },
+    teacherJob: {
+        type: String,
+        default: "",
+    },
+    teacherImageUrl: {
+        type: String,
+        default: "",
     },
     title: {
         type: String,

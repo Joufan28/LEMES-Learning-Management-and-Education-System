@@ -18,52 +18,51 @@ const SectionModal = () => {
 
   const section = selectedSectionIndex !== null ? sections[selectedSectionIndex] : null;
 
-  const methods = useForm<SectionFormData>({
+  const form = useForm<SectionFormData>({
     resolver: zodResolver(sectionSchema),
     defaultValues: {
-      title: "",
-      description: "",
+      sectionId: uuidv4(),
+      sectionTitle: "",
+      sectionDescription: "",
+      chapters: [],
     },
   });
 
   useEffect(() => {
     if (section) {
-      methods.reset({
-        title: section.sectionTitle,
-        description: section.sectionDescription,
+      form.reset({
+        sectionId: section.sectionId,
+        sectionTitle: section.sectionTitle,
+        sectionDescription: section.sectionDescription || "",
+        chapters: section.chapters || [],
       });
     } else {
-      methods.reset({
-        title: "",
-        description: "",
+      form.reset({
+        sectionId: uuidv4(),
+        sectionTitle: "",
+        sectionDescription: "",
+        chapters: [],
       });
     }
-  }, [section, methods]);
+  }, [section, form]);
 
   const onClose = () => {
     dispatch(closeSectionModal());
   };
 
   const onSubmit = (data: SectionFormData) => {
-    const newSection: Section = {
-      sectionId: section?.sectionId || uuidv4(),
-      sectionTitle: data.title,
-      sectionDescription: data.description,
-      chapters: section?.chapters || [],
-    };
-
     if (selectedSectionIndex === null) {
-      dispatch(addSection(newSection));
+      dispatch(addSection(data));
     } else {
       dispatch(
         editSection({
           index: selectedSectionIndex,
-          section: newSection,
+          section: data,
         })
       );
     }
 
-    toast.success(`Section added/updated successfully but you need to save the course to apply the changes`);
+    toast.success(`Section ${selectedSectionIndex === null ? 'added' : 'updated'} successfully. Remember to save the course to apply changes.`);
     onClose();
   };
 
@@ -71,24 +70,33 @@ const SectionModal = () => {
     <CustomModal isOpen={isSectionModalOpen} onClose={onClose}>
       <div className="section-modal">
         <div className="section-modal__header">
-          <h2 className="section-modal__title">Add/Edit Section</h2>
+          <h2 className="section-modal__title">{selectedSectionIndex === null ? 'Add Section' : 'Edit Section'}</h2>
           <button onClick={onClose} className="section-modal__close">
             <X className="w-6 h-6" />
           </button>
         </div>
 
-        <Form {...methods}>
-          <form onSubmit={methods.handleSubmit(onSubmit)} className="section-modal__form">
-            <CustomFormField name="title" label="Section Title" placeholder="Write section title here" />
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="section-modal__form">
+            <CustomFormField 
+              name="sectionTitle" 
+              label="Section Title" 
+              placeholder="Write section title here" 
+            />
 
-            <CustomFormField name="description" label="Section Description" type="textarea" placeholder="Write section description here" />
+            <CustomFormField 
+              name="sectionDescription" 
+              label="Section Description" 
+              type="textarea" 
+              placeholder="Write section description here" 
+            />
 
             <div className="section-modal__actions">
               <Button type="button" variant="outline" onClick={onClose}>
                 Cancel
               </Button>
               <Button type="submit" className="bg-primary-700">
-                Save
+                {selectedSectionIndex === null ? 'Add Section' : 'Save Changes'}
               </Button>
             </div>
           </form>

@@ -13,6 +13,7 @@ import "filepond/dist/filepond.min.css";
 import FilePondPluginImagePreview from "filepond-plugin-image-preview";
 import FilePondPluginImageExifOrientation from "filepond-plugin-image-exif-orientation";
 import "filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css";
+import { Switch } from "@/components/ui/switch";
 
 registerPlugin(FilePondPluginImageExifOrientation, FilePondPluginImagePreview);
 
@@ -57,14 +58,17 @@ export const CustomFormField: React.FC<FormFieldProps> = ({ name, label, type = 
         );
       case "switch":
         return (
-          <CustomSwitch
-            checked={Boolean(field.value)}
-            onChange={(e) => field.onChange(e.target.checked)}
-            id={name}
-            label={label}
-            labelClassName={labelClassName}
-            className={inputClassName}
-          />
+          <div className="flex items-center space-x-2">
+            <Switch
+              checked={field.value}
+              onCheckedChange={field.onChange}
+              id={name}
+              className={`text-customgreys-dirtyGrey ${inputClassName}`}
+            />
+            <FormLabel htmlFor={name} className={labelClassName}>
+              {label}
+            </FormLabel>
+          </div>
         );
       case "file":
         const ACCEPTED_VIDEO_TYPES = ["video/mp4", "video/webm", "video/ogg"];

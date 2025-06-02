@@ -3,7 +3,7 @@ import { twMerge } from "tailwind-merge";
 import * as z from "zod";
 import { api } from "../state/api";
 import { toast } from "sonner";
-import { Chapter } from "./schemas";
+import { Chapter, Section, CourseFormData } from "./schemas";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -300,13 +300,28 @@ export const createCourseFormData = (
   formData.append("price", data.coursePrice.toString());
   formData.append("status", data.courseStatus ? "Published" : "Draft");
 
+  if (data.image instanceof File) {
+    formData.append("image", data.image);
+  } else if (typeof data.image === 'string') {
+    // If image is a string, it's likely an existing URL, decide if you need to send it
+    // If sending, make sure your backend handles receiving a URL vs a file.
+    // For now, only append if it's a new File.
+    // formData.append("image", data.image);
+  }
+
   // Create a serializable version of sections without File objects
   const serializableSections = sections.map((section) => ({
     ...section,
     chapters: section.chapters.map((chapter) => ({
-      ...chapter,
+      chapterId: chapter.chapterId,
+      type: chapter.type,
+      title: chapter.title,
+      content: chapter.content,
+      comments: chapter.comments,
       video: typeof chapter.video === "string" ? chapter.video : undefined,
-      videoFile: chapter.videoFile
+      videoFile: chapter.videoFile,
+      quizQuestions: chapter.quizQuestions || [],
+      resourceLinks: chapter.resourceLinks || [],
     })),
   }));
 
@@ -320,16 +335,16 @@ export const uploadAllVideos = async (
   courseId: string,
   getUploadVideoUrl: any
 ) => {
-  const updatedSections = localSections.map((section) => ({
+  const updatedSections: Section[] = localSections.map((section: Section) => ({
     ...section,
-    chapters: section.chapters.map((chapter) => ({
+    chapters: section.chapters.map((chapter: Chapter) => ({
       ...chapter,
     })),
   }));
 
   for (let i = 0; i < updatedSections.length; i++) {
     for (let j = 0; j < updatedSections[i].chapters.length; j++) {
-      const chapter = updatedSections[i].chapters[j];
+      const chapter: Chapter = updatedSections[i].chapters[j];
       if (chapter.video instanceof File && chapter.video.type === "video/mp4") {
         try {
           const updatedChapter = await uploadVideo(

@@ -6,12 +6,59 @@ import { useSidebar } from "@/components/ui/sidebar";
 import Loading from "@/components/Loading";
 import { useCourseProgressData } from "@/hooks/useCourseProgressData";
 
-const ChaptersSidebar = () => {
+// Define types locally for now as importing from @/types is causing issues
+interface Chapter {
+  chapterId: string;
+  title: string;
+  content: string;
+  video?: string | File;
+  freePreview?: boolean;
+  type: "Text" | "Quiz" | "Video";
+}
+
+interface SectionType {
+  sectionId: string;
+  sectionTitle: string;
+  sectionDescription?: string;
+  chapters: Chapter[];
+}
+
+interface CourseType {
+  courseId: string;
+  title: string;
+  sections: SectionType[];
+  // Add other necessary fields from Course type
+}
+
+interface ChapterProgress {
+  chapterId: string;
+  completed: boolean;
+}
+
+interface SectionProgressType {
+  sectionId: string;
+  chapters: ChapterProgress[];
+}
+
+interface UserCourseProgressType {
+  userId: string;
+  courseId: string;
+  sections: SectionProgressType[];
+  // Add other necessary fields from UserCourseProgress type
+}
+
+interface ChaptersSidebarProps {
+  isViewAsTeacher: boolean;
+  userProgress: UserCourseProgressType | undefined; // Allow undefined
+}
+
+const ChaptersSidebar: React.FC<ChaptersSidebarProps> = ({ isViewAsTeacher, userProgress }) => {
   const router = useRouter();
   const { setOpen } = useSidebar();
   const [expandedSections, setExpandedSections] = useState<string[]>([]);
 
-  const { user, course, userProgress, chapterId, courseId, isLoading, updateChapterProgress } = useCourseProgressData();
+  // Use useCourseProgressData to get course data, but userProgress will come from props
+  const { user, course, chapterId, courseId, isLoading, updateChapterProgress } = useCourseProgressData();
 
   const sidebarRef = useRef<HTMLDivElement>(null);
 
@@ -19,16 +66,27 @@ const ChaptersSidebar = () => {
     setOpen(false);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  if (isLoading) return <Loading />;
-  if (!user) return <div>Please sign in to view course progress.</div>;
-  if (!course || !userProgress) return <div>Error loading course content</div>;
+  // Adjusted loading/error state check
+  if (isLoading) {
+    return <div className="flex items-center justify-center min-h-screen">Memuat data kursus...</div>;
+  }
+
+  if (!user) {
+    return <div>Please sign in to view this course.</div>;
+  }
+
+  if (!course) {
+    return <div>Error loading course content</div>;
+  }
 
   const toggleSection = (sectionTitle: string) => {
     setExpandedSections((prevSections) => (prevSections.includes(sectionTitle) ? prevSections.filter((title) => title !== sectionTitle) : [...prevSections, sectionTitle]));
   };
 
   const handleChapterClick = (sectionId: string, chapterId: string) => {
-    router.push(`/user/courses/${courseId}/chapters/${chapterId}`, {
+    // When clicking a chapter in view as teacher mode, stay in view as teacher mode
+    const url = `/user/courses/${courseId}/chapters/${chapterId}${isViewAsTeacher ? '?viewAsTeacher=true' : ''}`;
+    router.push(url, {
       scroll: false,
     });
   };
@@ -39,18 +97,22 @@ const ChaptersSidebar = () => {
         <h2 className="chapters-sidebar__title">{course.title}</h2>
         <hr className="chapters-sidebar__divider" />
       </div>
-      {course.sections.map((section, index) => (
+      {/* Use CourseType for mapping sections */}
+      {course?.sections?.map((section: SectionType, index: number) => (
         <Section
           key={section.sectionId}
           section={section}
           index={index}
-          sectionProgress={userProgress?.sections?.find((s) => s.sectionId === section.sectionId)}
+          // Pass userProgress (which might be undefined in viewAsTeacher mode)
+          sectionProgress={userProgress?.sections?.find((s: SectionProgressType) => s.sectionId === section.sectionId)}
           chapterId={chapterId as string}
           courseId={courseId as string}
           expandedSections={expandedSections}
           toggleSection={toggleSection}
           handleChapterClick={handleChapterClick}
-          updateChapterProgress={updateChapterProgress}
+          // Only pass updateChapterProgress if not in view as teacher mode
+          updateChapterProgress={isViewAsTeacher ? undefined : updateChapterProgress}
+          isViewAsTeacher={isViewAsTeacher} // Pass isViewAsTeacher down
         />
       ))}
     </div>
@@ -67,18 +129,21 @@ const Section = ({
   toggleSection,
   handleChapterClick,
   updateChapterProgress,
+  isViewAsTeacher, // Receive isViewAsTeacher prop
 }: {
-  section: any;
+  section: SectionType; // Use SectionType
   index: number;
-  sectionProgress: any;
+  sectionProgress: SectionProgressType | undefined; // Use SectionProgressType or undefined
   chapterId: string;
   courseId: string;
   expandedSections: string[];
   toggleSection: (sectionTitle: string) => void;
   handleChapterClick: (sectionId: string, chapterId: string) => void;
-  updateChapterProgress: (sectionId: string, chapterId: string, completed: boolean) => void;
+  updateChapterProgress: ((sectionId: string, chapterId: string, completed: boolean) => void) | undefined; // Can be undefined
+  isViewAsTeacher: boolean; // Prop type
 }) => {
-  const completedChapters = sectionProgress?.chapters.filter((c: any) => c.completed).length || 0;
+  // Use optional chaining as sectionProgress can be undefined
+  const completedChapters = sectionProgress?.chapters?.filter((c: ChapterProgress) => c.completed).length || 0; // Use ChapterProgress
   const totalChapters = section.chapters.length;
   const isExpanded = expandedSections.includes(section.sectionTitle);
 
@@ -95,8 +160,20 @@ const Section = ({
 
       {isExpanded && (
         <div className="chapters-sidebar__section-content">
-          <ProgressVisuals section={section} sectionProgress={sectionProgress} completedChapters={completedChapters} totalChapters={totalChapters} />
-          <ChaptersList section={section} sectionProgress={sectionProgress} chapterId={chapterId} courseId={courseId} handleChapterClick={handleChapterClick} updateChapterProgress={updateChapterProgress} />
+          {/* Only show ProgressVisuals if not in view as teacher mode */}
+          {!isViewAsTeacher && (
+             <ProgressVisuals section={section} sectionProgress={sectionProgress} completedChapters={completedChapters} totalChapters={totalChapters} />
+          )}
+          <ChaptersList 
+            section={section} 
+            sectionProgress={sectionProgress} 
+            chapterId={chapterId} 
+            courseId={courseId} 
+            handleChapterClick={handleChapterClick}
+            // Pass updateChapterProgress down (might be undefined)
+            updateChapterProgress={updateChapterProgress}
+            isViewAsTeacher={isViewAsTeacher} // Pass isViewAsTeacher down
+            />
         </div>
       )}
       <hr className="chapters-sidebar__divider" />
@@ -104,13 +181,18 @@ const Section = ({
   );
 };
 
-const ProgressVisuals = ({ section, sectionProgress, completedChapters, totalChapters }: { section: any; sectionProgress: any; completedChapters: number; totalChapters: number }) => {
+const ProgressVisuals = ({ section, sectionProgress, completedChapters, totalChapters }: { section: SectionType; sectionProgress: SectionProgressType | undefined; completedChapters: number; totalChapters: number }) => {
+  // Ensure sectionProgress is not undefined before accessing chapters
+  const chapterProgresses = sectionProgress?.chapters || [];
+
   return (
     <>
       <div className="chapters-sidebar__progress">
         <div className="chapters-sidebar__progress-bars">
-          {section.chapters.map((chapter: any) => {
-            const isCompleted = sectionProgress?.chapters.find((c: any) => c.chapterId === chapter.chapterId)?.completed;
+          {/* Use Chapter type for mapping chapters */}
+          {section.chapters.map((chapter: Chapter) => {
+            // Use optional chaining
+            const isCompleted = chapterProgresses.find((c: ChapterProgress) => c.chapterId === chapter.chapterId)?.completed; // Use ChapterProgress
             return <div key={chapter.chapterId} className={cn("chapters-sidebar__progress-bar", isCompleted && "chapters-sidebar__progress-bar--completed")}></div>;
           })}
         </div>
@@ -132,17 +214,20 @@ const ChaptersList = ({
   courseId,
   handleChapterClick,
   updateChapterProgress,
+  isViewAsTeacher, // Receive isViewAsTeacher prop
 }: {
-  section: any;
-  sectionProgress: any;
+  section: SectionType; // Use SectionType
+  sectionProgress: SectionProgressType | undefined; // Can be undefined
   chapterId: string;
   courseId: string;
   handleChapterClick: (sectionId: string, chapterId: string) => void;
-  updateChapterProgress: (sectionId: string, chapterId: string, completed: boolean) => void;
+  updateChapterProgress: ((sectionId: string, chapterId: string, completed: boolean) => void) | undefined; // Can be undefined
+  isViewAsTeacher: boolean; // Prop type
 }) => {
   return (
     <ul className="chapters-sidebar__chapters">
-      {section.chapters.map((chapter: any, index: number) => (
+      {/* Use Chapter type for mapping chapters */}
+      {section.chapters.map((chapter: Chapter, index: number) => (
         <Chapter
           key={chapter.chapterId}
           chapter={chapter}
@@ -152,7 +237,8 @@ const ChaptersList = ({
           chapterId={chapterId}
           courseId={courseId}
           handleChapterClick={handleChapterClick}
-          updateChapterProgress={updateChapterProgress}
+          updateChapterProgress={updateChapterProgress} // Pass down (might be undefined)
+          isViewAsTeacher={isViewAsTeacher} // Pass down
         />
       ))}
     </ul>
@@ -168,24 +254,29 @@ const Chapter = ({
   courseId,
   handleChapterClick,
   updateChapterProgress,
+  isViewAsTeacher, // Receive isViewAsTeacher prop
 }: {
-  chapter: any;
+  chapter: Chapter; // Use Chapter type
   index: number;
   sectionId: string;
-  sectionProgress: any;
+  sectionProgress: SectionProgressType | undefined; // Can be undefined
   chapterId: string;
   courseId: string;
   handleChapterClick: (sectionId: string, chapterId: string) => void;
-  updateChapterProgress: (sectionId: string, chapterId: string, completed: boolean) => void;
+  updateChapterProgress: ((sectionId: string, chapterId: string, completed: boolean) => void) | undefined; // Can be undefined
+  isViewAsTeacher: boolean; // Prop type
 }) => {
-  const chapterProgress = sectionProgress?.chapters.find((c: any) => c.chapterId === chapter.chapterId);
+  // Use optional chaining as sectionProgress can be undefined
+  const chapterProgress = sectionProgress?.chapters?.find((c: ChapterProgress) => c.chapterId === chapter.chapterId); // Use ChapterProgress
   const isCompleted = chapterProgress?.completed;
   const isCurrentChapter = chapterId === chapter.chapterId;
 
+  // Only allow toggling complete if not in view as teacher mode and updateProgress function is available
   const handleToggleComplete = (e: React.MouseEvent) => {
-    e.stopPropagation();
-
-    updateChapterProgress(sectionId, chapter.chapterId, !isCompleted);
+    if (!isViewAsTeacher && updateChapterProgress) {
+      e.stopPropagation();
+      updateChapterProgress(sectionId, chapter.chapterId, !isCompleted);
+    }
   };
 
   return (
@@ -195,11 +286,23 @@ const Chapter = ({
       })}
       onClick={() => handleChapterClick(sectionId, chapter.chapterId)}
     >
-      {isCompleted ? (
-        <div className="chapters-sidebar__chapter-check" onClick={handleToggleComplete} title="Toggle completion status">
-          <CheckCircle className="chapters-sidebar__check-icon" />
-        </div>
+      {/* Only show completion status check if not in view as teacher mode */}
+      {!isViewAsTeacher ? (
+        isCompleted ? (
+          <div className="chapters-sidebar__chapter-check" onClick={handleToggleComplete} title="Toggle completion status">
+            <CheckCircle className="chapters-sidebar__check-icon" />
+          </div>
+        ) : (
+          <div
+            className={cn("chapters-sidebar__chapter-number", {
+              "chapters-sidebar__chapter-number--current": isCurrentChapter,
+            })}
+          >
+            {index + 1}
+          </div>
+        )
       ) : (
+        // In view as teacher mode, just show the number
         <div
           className={cn("chapters-sidebar__chapter-number", {
             "chapters-sidebar__chapter-number--current": isCurrentChapter,

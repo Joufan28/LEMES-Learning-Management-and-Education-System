@@ -62,7 +62,7 @@ export const api = createApi({
     COURSES
     =============== 
     */
-    getCourses: build.query<Course[], { category?: string }>({
+    getCourses: build.query<{ data: Course[] }, { category?: string }>({
       query: ({ category }) => ({
         url: "courses",
         params: { category },
@@ -75,7 +75,12 @@ export const api = createApi({
       providesTags: (result, error, id) => [{ type: "Courses", id }],
     }),
 
-    createCourse: build.mutation<Course, { teacherId: string; teacherName: string }>({
+    createCourse: build.mutation<Course, { 
+      teacherId: string; 
+      teacherName: string;
+      teacherBio?: string;
+      teacherJob?: string;
+    }>({
       query: (body) => ({
         url: `courses`,
         method: "POST",
@@ -123,7 +128,7 @@ export const api = createApi({
     TRANSACTIONS
     =============== 
     */
-    getTransactions: build.query<Transaction[], string>({
+    getTransactions: build.query<{ data: Transaction[] }, string>({
       query: (userId) => `transactions?userId=${userId}`,
     }),
     createStripePaymentIntent: build.mutation<{ clientSecret: string }, { amount: number }>({
@@ -146,7 +151,7 @@ export const api = createApi({
     USER COURSE PROGRESS
     =============== 
     */
-    getUserEnrolledCourses: build.query<Course[], string>({
+    getUserEnrolledCourses: build.query<{ data: Course[] }, string>({
       query: (userId) => `users/course-progress/${userId}/enrolled-courses`,
       providesTags: ["Courses", "UserCourseProgress"],
     }),

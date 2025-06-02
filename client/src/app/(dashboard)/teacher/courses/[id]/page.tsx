@@ -5,7 +5,7 @@ import DroppableComponent from "@/app/(dashboard)/teacher/courses/[id]/Droppable
 import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
-import { courseSchema } from "@/lib/schemas";
+import { courseSchema, Section, Chapter, CourseFormData } from "@/lib/schemas";
 import { centsToDollars, createCourseFormData } from "@/lib/utils";
 import { openSectionModal, setSections } from "@/state";
 import { useGetCourseQuery, useUpdateCourseMutation } from "@/state/api";
@@ -22,11 +22,12 @@ const CourseEditor = () => {
   const router = useRouter();
   const params = useParams();
   const id = params.id as string;
-  const { data, isLoading, refetch } = useGetCourseQuery(id);
-  const course = data?.data || [];
+  const { data: courseData, isLoading, refetch } = useGetCourseQuery(id);
   const [updatedCourse] = useUpdateCourseMutation();
 
-  //upload video
+  console.log("Course ID:", id);
+  console.log("Course Data:", courseData);
+  console.log("Is Loading:", isLoading);
 
   const dispatch = useAppDispatch();
   const { sections } = useAppSelector((state) => state.global.courseEditor);
@@ -39,39 +40,66 @@ const CourseEditor = () => {
       courseCategory: "",
       coursePrice: "0",
       courseStatus: false,
+      sections: [],
+      image: "",
     },
   });
 
   useEffect(() => {
-    if (course && !isLoading) {
-      methods.reset({
-        courseTitle: course.title,
-        courseDescription: course.description,
-        courseCategory: course.category,
-        coursePrice: centsToDollars(course.price),
-        courseStatus: course.status === "Published",
+    console.log("Effect triggered with course data:", courseData);
+    if (courseData?.data && !isLoading) {
+      const course = courseData.data;
+      console.log("Resetting form with course data:", {
+        title: course.title,
+        description: course.description,
+        category: course.category,
+        price: course.price,
+        status: course.status,
+        sections: course.sections,
+        image: course.image,
       });
-      dispatch(setSections(course.sections || []));
+      
+      methods.reset({
+        courseTitle: course.title || "",
+        courseDescription: course.description || "",
+        courseCategory: course.category || "",
+        coursePrice: centsToDollars(course.price || 0).toString(),
+        courseStatus: course.status === "Published",
+        sections: course.sections || [],
+        image: course.image || "",
+      });
+      
+      if (course.sections) {
+        console.log("Setting sections:", course.sections);
+        dispatch(setSections(course.sections));
+      }
     }
-  }, [course, isLoading, methods, dispatch]);
+  }, [courseData, isLoading, methods, dispatch]);
 
   const onSubmit = async (data: CourseFormData) => {
     try {
-      // const updatedSections = await uploadAllVideos(sections, id, getUploadVideoUrl);
-
       const formData = createCourseFormData(data, sections);
-
+      
       await updatedCourse({
         courseId: id,
         formData,
       }).unwrap();
 
-      refetch();
+      await refetch();
+      
       router.push("/teacher/courses");
     } catch (error) {
       console.error("Failed to update course:", error);
     }
   };
+
+  if (isLoading) {
+    return <div className="flex items-center justify-center min-h-screen">Memuat data kursus...</div>;
+  }
+
+  if (!courseData?.data) {
+    return <div className="flex items-center justify-center min-h-screen">Kursus tidak ditemukan</div>;
+  }
 
   return (
     <div>
@@ -110,9 +138,9 @@ const CourseEditor = () => {
           <div className="flex justify-between md:flex-row flex-col gap-10 mt-5 font-dm-sans">
             <div className="basis-1/2">
               <div className="space-y-4">
-                <CustomFormField name="courseTitle" label="Course Title" type="text" placeholder="Write course title here" className="border-none" initialValue={course?.title} />
+                <CustomFormField name="courseTitle" label="Course Title" type="text" placeholder="Write course title here" className="border-none" />
 
-                <CustomFormField name="courseDescription" label="Course Description" type="textarea" placeholder="Write course description here" initialValue={course?.description} />
+                <CustomFormField name="courseDescription" label="Course Description" type="textarea" placeholder="Write course description here" />
 
                 <CustomFormField
                   name="courseCategory"
@@ -120,18 +148,34 @@ const CourseEditor = () => {
                   type="select"
                   placeholder="Select category here"
                   options={[
-                    { value: "technology", label: "Technology" },
-                    { value: "science", label: "Science" },
-                    { value: "mathematics", label: "Mathematics" },
-                    {
-                      value: "Artificial Intelligence",
-                      label: "Artificial Intelligence",
-                    },
+                    { value: "web-development", label: "Web Development" },
+                    { value: "data-science", label: "Data Science" },
+                    { value: "machine-learning", label: "Machine Learning" },
+                    { value: "react", label: "React" },
+                    { value: "python", label: "Python" },
+                    { value: "business", label: "Business" },
+                    { value: "design", label: "Design" },
+                    { value: "marketing", label: "Marketing" },
+                    { value: "mobile-development", label: "Mobile Development" },
+                    { value: "ui-ux", label: "UI/UX" },
+                    { value: "finance", label: "Finance" },
+                    { value: "photography", label: "Photography" },
+                    { value: "music", label: "Music" },
+                    { value: "language", label: "Language" },
+                    { value: "health", label: "Health" },
+                    { value: "personal-development", label: "Personal Development" },
                   ]}
-                  initialValue={course?.category}
                 />
 
-                <CustomFormField name="coursePrice" label="Course Price" type="number" placeholder="0" initialValue={course?.price} />
+                <CustomFormField name="coursePrice" label="Course Price" type="number" placeholder="0" />
+
+                <CustomFormField
+                  name="image"
+                  label="Course Thumbnail"
+                  type="file"
+                  accept="image/*"
+                />
+
               </div>
             </div>
 
@@ -139,13 +183,26 @@ const CourseEditor = () => {
               <div className="flex justify-between items-center mb-2">
                 <h2 className="text-2xl font-semibold text-secondary-foreground">Sections</h2>
 
-                <Button type="button" variant="outline" size="sm" onClick={() => dispatch(openSectionModal({ sectionIndex: null }))} className="border-none text-primary-700 group">
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => dispatch(openSectionModal({ sectionIndex: null }))} 
+                  className="border-none text-primary-700 group"
+                >
                   <Plus className="mr-1 h-4 w-4 text-primary-700 group-hover:white-100" />
                   <span className="text-primary-700 group-hover:white-100">Add Section</span>
                 </Button>
               </div>
 
-              {isLoading ? <p>Loading course content...</p> : sections.length > 0 ? <DroppableComponent /> : <p>No sections available</p>}
+              {isLoading ? (
+                <p>Loading course content...</p>
+              ) : sections.length > 0 ? (
+                <DroppableComponent />
+              ) : (
+                <p>No sections available</p>
+              )}
+
             </div>
           </div>
         </form>

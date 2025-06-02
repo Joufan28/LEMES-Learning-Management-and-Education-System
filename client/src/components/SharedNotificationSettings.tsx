@@ -1,6 +1,9 @@
 "use client";
 
-import { NotificationSettingsFormData, notificationSettingsSchema } from "@/lib/schemas";
+import {
+  NotificationSettingsFormData,
+  notificationSettingsSchema,
+} from "@/lib/schemas";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useUpdateUserMutation } from "@/state/api";
 import { useUser } from "@clerk/nextjs";
@@ -11,11 +14,15 @@ import { Form } from "@/components/ui/form";
 import { CustomFormField } from "./CustomFormField";
 import { Button } from "@/components/ui/button";
 
-const SharedNotificationSettings = ({ title = "Notification Settings", subtitle = "Manage your notification settings" }: SharedNotificationSettingsProps) => {
+const SharedNotificationSettings = ({
+  title = "Notification Settings",
+  subtitle = "Manage your notification settings",
+}: SharedNotificationSettingsProps) => {
   const { user } = useUser();
   const [updateUser] = useUpdateUserMutation();
 
-  const currentSettings = (user?.publicMetadata as { settings?: UserSettings })?.settings || {};
+  const currentSettings =
+    (user?.publicMetadata as { settings?: UserSettings })?.settings || {};
 
   const methods = useForm<NotificationSettingsFormData>({
     resolver: zodResolver(notificationSettingsSchema),
@@ -54,11 +61,26 @@ const SharedNotificationSettings = ({ title = "Notification Settings", subtitle 
     <div className="notification-settings">
       <Header title={title} subtitle={subtitle} />
       <Form {...methods}>
-        <form onSubmit={methods.handleSubmit(onSubmit)} className="notification-settings__form">
+        <form
+          onSubmit={methods.handleSubmit(onSubmit)}
+          className="notification-settings__form"
+        >
           <div className="notification-settings__fields">
-            <CustomFormField name="courseNotifications" label="Course Notifications" type="switch" />
-            <CustomFormField name="emailAlerts" label="Email Alerts" type="switch" />
-            <CustomFormField name="smsAlerts" label="SMS Alerts" type="switch" />
+            <CustomFormField
+              name="courseNotifications"
+              label="Course Notifications"
+              type="switch"
+            />
+            <CustomFormField
+              name="emailAlerts"
+              label="Email Alerts"
+              type="switch"
+            />
+            <CustomFormField
+              name="smsAlerts"
+              label="SMS Alerts"
+              type="switch"
+            />
 
             <CustomFormField
               name="notificationFrequency"

@@ -4,25 +4,52 @@ import Loading from "@/components/Loading";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { formatPrice } from "@/lib/utils";
-import { useGetTransactionsQuery } from "@/state/api";
+import { useGetTransactionsQuery, useGetUserEnrolledCoursesQuery } from "@/state/api";
 import { useUser } from "@clerk/nextjs";
 import React, { useState } from "react";
+
+interface Transaction {
+  userId: string;
+  transactionId: string;
+  dateTime: string;
+  courseId: string;
+  paymentProvider: string;
+  amount: number;
+}
+
+interface Course {
+  courseId: string;
+  title: string;
+}
 
 const UserBilling = () => {
   const [paymentType, setPaymentType] = useState("all");
   const { user, isLoaded } = useUser();
-  const { data, isLoading: isLoadingTransactions } = useGetTransactionsQuery(user?.id || "", {
+  const { data: transactionsResponse, isLoading: isLoadingTransactions } = useGetTransactionsQuery(user?.id || "", {
     skip: !isLoaded || !user,
   });
-  const transactions = data?.data || [];
+  const { data: enrolledCoursesData, isLoading: isLoadingEnrolledCourses } = useGetUserEnrolledCoursesQuery(user?.id || "", {
+    skip: !isLoaded || !user,
+  });
 
-  const filteredData =
-    transactions?.filter((transaction) => {
-      const matchesTypes = paymentType === "all" || transaction.paymentProvider === paymentType;
-      return matchesTypes;
-    }) || [];
+  const transactions: Transaction[] = transactionsResponse?.data || [];
+  const enrolledCourses: Course[] = enrolledCoursesData?.data || [];
 
-  if (!isLoaded) return <Loading />;
+  const filteredData = transactions.filter((transaction: Transaction) => {
+    const matchesTypes = paymentType === "all" || transaction.paymentProvider === paymentType;
+    return matchesTypes;
+  });
+
+  const getCourseName = (courseId: string): string => {
+    if (!Array.isArray(enrolledCourses)) {
+      console.error("enrolledCourses is not an array:", enrolledCourses);
+      return "Error fetching course name";
+    }
+    const course = enrolledCourses.find((course) => course.courseId === courseId);
+    return course?.title || "Unknown Course";
+  };
+
+  if (!isLoaded || isLoadingTransactions || isLoadingEnrolledCourses) return <Loading />;
   if (!user) return <div>Please sign in to view your billing information.</div>;
 
   return (
@@ -50,36 +77,39 @@ const UserBilling = () => {
         </div>
 
         <div className="billing__grid">
-          {isLoadingTransactions ? (
-            <Loading />
-          ) : (
-            <Table className="billing__table">
-              <TableHeader className="billing__table-header">
-                <TableRow className="billing__table-header-row">
-                  <TableHead className="billing__table-cell">Date</TableHead>
-                  <TableHead className="billing__table-cell">Amount</TableHead>
-                  <TableHead className="billing__table-cell">Payment Method</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody className="billing__table-body">
-                {filteredData.length > 0 ? (
-                  filteredData.map((transaction) => (
+          <Table className="billing__table">
+            <TableHeader className="billing__table-header">
+              <TableRow className="billing__table-header-row">
+                <TableHead className="billing__table-cell">Date</TableHead>
+                <TableHead className="billing__table-cell">Course</TableHead>
+                <TableHead className="billing__table-cell">Amount</TableHead>
+                <TableHead className="billing__table-cell">Payment Method</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody className="billing__table-body">
+              {filteredData.length > 0 ? (
+                filteredData.map((transaction: Transaction) => {
+                  console.log("Transaction:", transaction);
+                  console.log("Enrolled Courses:", enrolledCourses);
+                  const course = enrolledCourses.find((course) => course.courseId === transaction.courseId);
+                  return (
                     <TableRow className="billing__table-row" key={transaction.transactionId}>
                       <TableCell className="billing__table-cell">{new Date(transaction.dateTime).toLocaleDateString()}</TableCell>
+                      <TableCell className="billing__table-cell">{getCourseName(transaction.courseId)}</TableCell>
                       <TableCell className="billing__table-cell billing__amount">{formatPrice(transaction.amount)}</TableCell>
                       <TableCell className="billing__table-cell">{transaction.paymentProvider}</TableCell>
                     </TableRow>
-                  ))
-                ) : (
-                  <TableRow className="billing__table-row">
-                    <TableCell className="billing__table-cell text-center" colSpan={3}>
-                      No transactions to display
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          )}
+                  );
+                })
+              ) : (
+                <TableRow className="billing__table-row">
+                  <TableCell className="billing__table-cell text-center" colSpan={4}>
+                    No transactions to display
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
         </div>
       </div>
     </div>

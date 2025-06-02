@@ -31,6 +31,7 @@ declare global {
     };
     unsafeMetadata: {
       bio?: string;
+      job?: string;
       urls?: string[];
     };
   }
@@ -39,17 +40,20 @@ declare global {
     courseId: string;
     teacherId: string;
     teacherName: string;
+    teacherBio?: string;
+    teacherJob?: string;
+    teacherImageUrl?: string;
     title: string;
-    description?: string;
+    description: string;
     category: string;
     image?: string;
-    price?: number; // Stored in cents (e.g., 4999 for $49.99)
-    level: "Beginner" | "Intermediate" | "Advanced";
-    status: "Draft" | "Published";
+    price: number;
+    level: string;
+    status: "Published" | "Draft";
     sections: Section[];
-    enrollments?: Array<{
-      userId: string;
-    }>;
+    enrollments: { userId: string }[];
+    createdAt: string;
+    updatedAt: string;
   }
 
   interface Transaction {

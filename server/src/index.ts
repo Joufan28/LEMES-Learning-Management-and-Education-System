@@ -26,22 +26,42 @@ export const clerkClient = createClerkClient({
 });
 
 const app = express();
+
+// Log incoming request path
+app.use((req, res, next) => {
+  console.log(`[Backend] Received request: ${req.method} ${req.url}`);
+  next();
+});
+
 app.use(express.json());
 app.use(helmet());
 app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" }));
 app.use(morgan("common"));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(cors());
+// Configure CORS to allow credentials from specific origin
+app.use(cors({ origin: 'http://localhost:3000', credentials: true }));
 app.use(clerkMiddleware());
+
+// Log Clerk related information
+app.use((req: any, res, next) => {
+  console.log(`[Backend] CLERK_SECRET_KEY is set: ${!!process.env.CLERK_SECRET_KEY}`);
+  console.log(`[Backend] req.auth after clerkMiddleware:`, req.auth);
+  try {
+    console.log(`[Backend] Result of req.auth():`, req.auth());
+  } catch (e) {
+    console.log(`[Backend] Error calling req.auth():`, e);
+  }
+  next();
+});
 
 /* ROUTES */
 app.get("/", (req, res) => {
   res.send("Hello World");
 });
 
-app.use("/courses", courseRoutes);
 app.use("/users/clerk", requireAuth(), userClerkRoutes);
+app.use("/courses", courseRoutes);
 app.use("/transactions", requireAuth(), transactionRoutes);
 app.use("/users/course-progress", requireAuth(), userCourseProgressRoutes);
 

@@ -5,73 +5,81 @@ import { cn } from "@/lib/utils";
 import { Button } from "./ui/button";
 import { Pencil, Trash2 } from "lucide-react";
 
-interface TeacherCourseCardProps {
-  course: {
-    courseId: string;
-    title: string;
-    category: string;
-    status: "Published" | "Draft";
-    enrollments?: any[];
-    image?: string;
-    teacherId: string;
-  };
-  onEdit: (course: any) => void;
-  onDelete: (course: any) => void;
-  isOwner: boolean;
+// Define Course interface locally for now
+interface Course {
+  courseId: string;
+  teacherId: string;
+  teacherName: string;
+  teacherBio?: string;
+  teacherJob?: string;
+  teacherImageUrl?: string;
+  title: string;
+  description: string;
+  category: string;
+  image?: string;
+  price: number;
+  level: string;
+  status: "Published" | "Draft";
+  sections: any[]; // Use any for simplicity for now
+  enrollments: any[]; // Use any for simplicity for now
+  createdAt: string;
+  updatedAt: string;
 }
 
-const TeacherCourseCard = React.memo(
-  ({ course, onEdit, onDelete, isOwner }: TeacherCourseCardProps) => {
-    return (
-      <Card className="course-card-teacher group">
-        <CardHeader className="course-card-teacher__header p-0 relative">
-          <Image src={course.image || "/placeholder.png"} alt={course.title} width={370} height={150} className="course-card-teacher__image rounded-t-lg" priority />
-        </CardHeader>
+interface TeacherCourseCardProps {
+  course: Course;
+  onEdit: (course: Course) => void;
+  onDelete: (courseId: string) => void;
+  isOwner: boolean;
+  onViewCourse: (course: Course) => void;
+}
 
-        <CardContent className="course-card-teacher__content p-4">
-          <div className="flex flex-col mb-3">
-            <CardTitle className="course-card-teacher__title text-lg font-bold mb-1">{course.title}</CardTitle>
+const TeacherCourseCard: React.FC<TeacherCourseCardProps> = ({
+  course,
+  onEdit,
+  onDelete,
+  isOwner,
+  onViewCourse,
+}) => {
+  const imageUrl = course.image || "/placeholder.png";
+  const statusColor = course.status === "Published" ? "bg-green-500" : "bg-yellow-500";
 
-            <CardDescription className="course-card-teacher__category text-sm text-gray-400 mb-2">{course.category}</CardDescription>
+  return (
+    <Card className="teacher-course-card w-full max-w-sm rounded-lg overflow-hidden shadow-lg bg-customgreys-secondarybg border-slate-500">
+      <div className="relative w-full h-48">
+        <Image
+          src={imageUrl}
+          alt={course.title}
+          layout="fill"
+          objectFit="cover"
+        />
+      </div>
+      <CardContent className="p-4">
+        <CardTitle className="text-lg font-bold mb-2 text-white-100">{course.title}</CardTitle>
+        <CardDescription className="text-sm text-gray-400 mb-2">{course.category}</CardDescription>
+        <div className="flex items-center mb-2">
+          <span className={cn("px-2 py-1 text-xs font-semibold text-white rounded-full", statusColor)}>{course.status}</span>
+        </div>
+        <p className="text-sm text-gray-400 mb-4">{course.enrollments?.length || 0} Students Enrolled</p>
 
-            <div className="flex items-center mb-2">
-              <span className="text-sm mr-2">Status:</span>
-              <span className={cn("font-semibold px-2 py-1 rounded text-xs", course.status === "Published" ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400")}>{course.status}</span>
+        <div className="flex justify-between items-center">
+          {isOwner && (
+            <div className="flex space-x-2">
+              <Button variant="outline" size="sm" onClick={() => onViewCourse(course)} className="text-blue-500 border-blue-500 hover:bg-customgreys-primarybg/70 hover:text-white">
+                View Your Course
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => onEdit(course)} className="text-yellow-500 border-yellow-500 hover:bg-customgreys-primarybg/70 hover:text-white">
+                <Pencil className="h-4 w-4" />
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => onDelete(course.courseId)} className="text-red-500 border-red-500 hover:bg-customgreys-primarybg/70 hover:text-white">
+                <Trash2 className="h-4 w-4" />
+              </Button>
             </div>
-
-            {course.enrollments && course.enrollments.length > 0 && (
-              <p className="text-sm text-gray-400 mt-1">
-                <span className="font-medium text-gray-200">{course.enrollments.length}</span> Student{course.enrollments.length !== 1 ? "s" : ""} Enrolled
-              </p>
-            )}
-          </div>
-
-          <div className="w-full flex flex-col sm:flex-row sm:space-y-0 gap-2 mt-auto">
-            {isOwner ? (
-              <>
-                <Button variant="outline" className="course-card-teacher__edit-button flex-1" onClick={() => onEdit(course)}>
-                  <Pencil className="w-4 h-4 mr-2" />
-                  Edit
-                </Button>
-                <Button variant="destructive" className="course-card-teacher__delete-button flex-1" onClick={() => onDelete(course)}>
-                  <Trash2 className="w-4 h-4 mr-2" />
-                  Delete
-                </Button>
-              </>
-            ) : (
-              <p className="text-sm text-gray-500 italic text-center w-full py-2">View Only</p>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-    );
-  },
-  // Custom comparison function untuk mencegah re-render tidak perlu
-  (prevProps, nextProps) => {
-    return prevProps.course.courseId === nextProps.course.courseId && prevProps.isOwner === nextProps.isOwner;
-  }
-);
-
-TeacherCourseCard.displayName = "TeacherCourseCard";
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
 
 export default TeacherCourseCard;

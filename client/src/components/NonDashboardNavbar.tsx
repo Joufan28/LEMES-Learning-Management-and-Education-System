@@ -2,12 +2,13 @@
 
 import { SignedIn, SignedOut, UserButton, useUser } from "@clerk/nextjs";
 import { dark } from "@clerk/themes";
-import { Bell, BookOpen, Search, Bookmark, ChevronRight } from "lucide-react";
+import { Bell, BookOpen, Search, Bookmark, ChevronRight, Loader2 } from "lucide-react";
 import Link from "next/link";
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useCallback } from "react";
 import Image from "next/image";
-import { useGetUserEnrolledCoursesQuery } from "@/state/api";
-import { useRouter } from "next/navigation";
+import { useGetUserEnrolledCoursesQuery, useGetCoursesQuery } from "@/state/api";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import debounce from "lodash/debounce";
 
 const NonDashboardNavbar = () => {
   const router = useRouter();
@@ -18,9 +19,15 @@ const NonDashboardNavbar = () => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isLearningOpen, setIsLearningOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [searchSuggestions, setSearchSuggestions] = useState<any[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
 
   // Menggunakan API untuk mendapatkan kursus yang diikuti
   const { data: enrolledCoursesData, isLoading: isLoadingEnrolledCourses } = useGetUserEnrolledCoursesQuery(userId as string, { skip: !userId || !isLoaded });
+
+  // Get all courses for search suggestions
+  const { data: coursesData } = useGetCoursesQuery({});
 
   const courses = enrolledCoursesData?.data || [];
 
@@ -28,6 +35,39 @@ const NonDashboardNavbar = () => {
   const latestCourses = useMemo(() => {
     return courses.slice(0, 5);
   }, [courses]);
+
+  // Debounced search function
+  const debouncedSearch = useCallback(
+    debounce((query: string) => {
+      if (query.trim()) {
+        setIsLoadingSuggestions(true);
+        // Filter courses based on search query
+        const filtered = coursesData?.data?.filter((course) =>
+          course.title.toLowerCase().includes(query.toLowerCase())
+        ) || [];
+        setSearchSuggestions(filtered);
+        setShowSuggestions(true);
+        setIsLoadingSuggestions(false);
+      } else {
+        setSearchSuggestions([]);
+        setShowSuggestions(false);
+      }
+    }, 300),
+    [coursesData]
+  );
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchQuery(value);
+    debouncedSearch(value);
+  };
+
+  const handleSuggestionClick = (course: any) => {
+    setSearchQuery(course.title);
+    setShowSuggestions(false);
+    router.push(`/search?id=${encodeURIComponent(course.courseId)}`);
+    setIsSearchOpen(false);
+  };
 
   const handleGoToCourse = (course: any) => {
     setIsLearningOpen(false);
@@ -56,6 +96,9 @@ const NonDashboardNavbar = () => {
     }
   };
 
+  const pathname = usePathname();
+  const isSearchPage = pathname === '/search';
+
   return (
     <>
       {/* Search Overlay */}
@@ -75,7 +118,7 @@ const NonDashboardNavbar = () => {
               <input
                 type="text"
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={handleSearchChange}
                 placeholder="Search for courses, topics, or instructors..."
                 className="w-full py-4 pl-16 pr-6 bg-gray-800 text-white rounded-xl text-lg border border-gray-700 focus:border-blue-500 focus:outline-none transition-colors"
                 autoFocus
@@ -84,6 +127,42 @@ const NonDashboardNavbar = () => {
               <button type="submit" className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded-lg transition-colors">
                 Search
               </button>
+
+              {/* Search Suggestions Dropdown */}
+              {showSuggestions && (
+                <div className="absolute w-full mt-2 bg-gray-800 rounded-xl border border-gray-700 shadow-xl max-h-96 overflow-y-auto">
+                  {isLoadingSuggestions ? (
+                    <div className="flex items-center justify-center py-4">
+                      <Loader2 className="w-6 h-6 text-blue-500 animate-spin" />
+                    </div>
+                  ) : searchSuggestions.length > 0 ? (
+                    searchSuggestions.map((course) => (
+                      <button
+                        key={course.courseId}
+                        onClick={() => handleSuggestionClick(course)}
+                        className="w-full px-6 py-3 text-left text-white hover:bg-gray-700 transition-colors flex items-center space-x-3"
+                      >
+                        <div className="relative w-10 h-10 flex-shrink-0">
+                          <Image
+                            src={course.image || "/placeholder.png"}
+                            alt={course.title}
+                            fill
+                            className="object-cover rounded-md"
+                          />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="font-medium">{course.title}</div>
+                          <div className="text-sm text-gray-400">By {course.teacherName}</div>
+                        </div>
+                      </button>
+                    ))
+                  ) : (
+                    <div className="px-6 py-4 text-gray-400 text-center">
+                      No courses found
+                    </div>
+                  )}
+                </div>
+              )}
             </form>
 
             <div className="mt-8">
@@ -95,7 +174,7 @@ const NonDashboardNavbar = () => {
                     onClick={() => {
                       setSearchQuery(topic);
                       setIsSearchOpen(false);
-                      router.push(`/search?q=${encodeURIComponent(topic)}`);
+                      router.push(`/search?q=${encodeURIComponent(topic)}&source=tag`);
                     }}
                     className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-full transition-colors"
                   >
@@ -120,12 +199,15 @@ const NonDashboardNavbar = () => {
                 <span className="text-2xl font-bold bg-gradient-to-r from-blue-500 to-indigo-500 bg-clip-text text-transparent group-hover:from-blue-400 group-hover:to-indigo-400 transition-colors">LEMES</span>
               </Link>
 
-              <div className="hidden md:flex">
-                <button onClick={() => setIsSearchOpen(true)} className="flex items-center space-x-2 bg-gray-900 hover:bg-gray-800 text-gray-400 hover:text-white px-4 py-2.5 rounded-xl transition-colors duration-300 border border-gray-800">
-                  <Search size={18} />
-                  <span>Search Courses</span>
-                </button>
-              </div>
+              {!isSearchPage && (
+                <div className="hidden md:flex">
+                  <button onClick={() => setIsSearchOpen(true)} className="flex items-center space-x-2 bg-gray-900 hover:bg-gray-800 text-gray-400 hover:text-white px-4 py-2.5 rounded-xl transition-colors duration-300 border border-gray-800">
+                    <Search size={18} />
+                    <span>Search Courses</span>
+                  </button>
+                </div>
+              )}
+
             </div>
 
             <div className="flex items-center space-x-4">
@@ -210,6 +292,15 @@ const NonDashboardNavbar = () => {
                   </div>
                 )}
               </SignedIn>
+
+              {!isSearchPage &&
+              <div className="hidden md:flex">
+                <Link href="/search" scroll={false} className="flex items-center space-x-2 bg-gray-900 hover:bg-gray-800 text-gray-400 hover:text-white px-4 py-2.5 rounded-xl transition-colors duration-300 border border-gray-800">
+                  <BookOpen size={18} />
+                  <span>Browse All Courses</span>
+                </Link>
+              </div>
+}
 
               {/* Notification Button */}
               <button className="relative p-2 rounded-full hover:bg-gray-800 transition-colors">

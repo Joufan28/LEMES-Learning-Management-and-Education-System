@@ -24,14 +24,108 @@ interface SearchCourseCardProps {
 
 const LoadingSkeleton = () => {
   return (
-    <div className="landing-skeleton">
-      <div className="landing-skeleton__hero">
-        <div className="landing-skeleton__hero-content">
-          <Skeleton className="landing-skeleton__title" />
-          <Skeleton className="landing-skeleton__subtitle" />
-          <Skeleton className="landing-skeleton__subtitle-secondary" />
-          <Skeleton className="landing-skeleton__button" />
-          <Skeleton className="landing-skeleton__hero-image" />
+    <div className="min-h-screen pt-16">
+      {/* Hero Section Skeleton */}
+      <div className="flex flex-col md:flex-row items-center justify-between px-4 py-20 max-w-7xl mx-auto">
+        <div className="w-full md:w-1/2 mb-10 md:mb-0">
+          <Skeleton className="h-16 md:h-20 w-3/4 bg-gray-800 mb-6 rounded" />
+          <Skeleton className="h-6 md:h-7 w-4/5 bg-gray-800 mb-8 rounded" />
+          <div className="flex flex-col sm:flex-row gap-4">
+            <Skeleton className="h-12 w-40 bg-blue-600 rounded-lg" />
+            <Skeleton className="h-12 w-40 bg-transparent border-2 border-gray-700 rounded-lg" />
+          </div>
+        </div>
+        <div className="w-full md:w-1/2 flex justify-center">
+          <Skeleton className="aspect-video w-full max-w-lg rounded-xl bg-gray-800" />
+        </div>
+      </div>
+
+      {/* Featured Courses Section Skeleton */}
+      <div className="max-w-7xl mx-auto px-4 py-20">
+        <div className="text-center mb-16">
+          <Skeleton className="h-10 md:h-12 w-64 md:w-80 mx-auto bg-gray-800 mb-4 rounded" />
+          <Skeleton className="h-6 md:h-7 w-2/3 md:w-3/4 mx-auto bg-gray-800 rounded" />
+        </div>
+
+        <div className="flex justify-center flex-wrap gap-3 mb-12">
+          {Array.from({ length: 8 }).map((_, index) => (
+            <Skeleton key={index} className="h-10 w-32 rounded-full bg-gray-800" />
+          ))}
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          {Array.from({ length: 4 }).map((_, index) => (
+            <div key={index} className="bg-gray-800 rounded-lg overflow-hidden border border-gray-700">
+              <Skeleton className="h-48 w-full" />
+              <div className="p-4">
+                <Skeleton className="h-6 w-4/5 mb-3 rounded" />
+                <Skeleton className="h-4 w-full mb-2 rounded" />
+                <Skeleton className="h-4 w-3/4 rounded" />
+              </div>
+            </div>
+          ))}
+        </div>
+        
+        <div className="text-center mt-12">
+          <Skeleton className="h-12 w-40 mx-auto bg-gray-800 rounded-lg" />
+        </div>
+      </div>
+
+      {/* Learning Goals Section Skeleton */}
+      <div className="max-w-7xl mx-auto px-4 py-20">
+        <div className="text-center mb-16">
+          <Skeleton className="h-12 w-96 mx-auto bg-gray-800 mb-4 rounded" />
+          <Skeleton className="h-6 w-1/2 mx-auto bg-gray-800 rounded" />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {Array.from({ length: 3 }).map((_, index) => (
+            <div key={index} className="rounded-xl p-6 border border-gray-700">
+              <Skeleton className="w-10 h-10 bg-blue-900 mb-4 rounded-full" />
+              <Skeleton className="h-7 w-4/5 bg-gray-200 mb-4 rounded" />
+              <Skeleton className="h-4 w-full mb-6 rounded" />
+              {index === 0 && (
+                <div className="bg-blue-900/30 p-4 rounded-lg mb-4 border border-blue-700/50">
+                  <Skeleton className="h-5 w-2/5 mb-2 bg-blue-800 rounded" />
+                  <Skeleton className="h-4 w-full rounded" />
+                </div>
+              )}
+              <Skeleton className="h-4 w-32 bg-blue-500 rounded" />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* AI Section Skeleton */}
+      <div className="max-w-7xl mx-auto px-4 py-20">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+          <div>
+            <Skeleton className="h-12 w-80 bg-gray-200 mb-6 rounded" />
+            <Skeleton className="h-6 w-full mb-8 rounded" />
+            <div className="flex flex-wrap gap-4 mb-8">
+              {Array.from({ length: 3 }).map((_, index) => (
+                <div key={index} className="bg-gray-800 p-4 rounded-lg border border-gray-700">
+                  <Skeleton className="h-7 w-16 mb-2 bg-gray-200 rounded" />
+                  <Skeleton className="h-4 w-24 rounded" />
+                </div>
+              ))}
+            </div>
+            <Skeleton className="h-12 w-40 bg-blue-600 rounded-lg" />
+          </div>
+          <div className="relative">
+            <Skeleton className="aspect-video w-full rounded-xl bg-gray-800" />
+            <div className="absolute -bottom-6 -right-6 bg-gray-800 p-6 rounded-xl shadow-lg w-3/4 border border-gray-700">
+              <Skeleton className="h-6 w-3/5 mb-4 bg-gray-200 rounded" />
+              <div className="space-y-2">
+                {Array.from({ length: 3 }).map((_, idx) => (
+                  <div key={idx} className="flex items-center">
+                    <Skeleton className="w-4 h-4 mr-2 bg-green-400 rounded-full" />
+                    <Skeleton className="h-4 w-40 rounded" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

@@ -44,6 +44,16 @@ const chapterSchema = new Schema({
   video: {
     type: String,
   },
+  quizQuestions: {
+    type: Array,
+    schema: [String],
+    default: [],
+  },
+  resourceLinks: {
+    type: Array,
+    schema: [String],
+    default: [],
+  },
 });
 
 const sectionSchema = new Schema({
@@ -78,6 +88,18 @@ const courseSchema = new Schema(
     teacherName: {
       type: String,
       required: true,
+    },
+    teacherBio: {
+      type: String,
+      default: "",
+    },
+    teacherJob: {
+      type: String,
+      default: "",
+    },
+    teacherImageUrl: {
+      type: String,
+      default: "",
     },
     title: {
       type: String,
