@@ -38,7 +38,7 @@ const NonDashboardNavbar = () => {
 
   // Debounced search function
   const debouncedSearch = useCallback(
-    debounce((query: string) => {
+    (query: string) => {
       if (query.trim()) {
         setIsLoadingSuggestions(true);
         // Filter courses based on search query
@@ -52,14 +52,20 @@ const NonDashboardNavbar = () => {
         setSearchSuggestions([]);
         setShowSuggestions(false);
       }
-    }, 300),
-    [coursesData?.data] // eslint-disable-line react-hooks/exhaustive-deps
+    },
+    [coursesData?.data]
+  );
+
+  // Create a memoized debounced version of the search function
+  const debouncedSearchMemo = useMemo(
+    () => debounce(debouncedSearch, 300),
+    [debouncedSearch]
   );
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setSearchQuery(value);
-    debouncedSearch(value);
+    debouncedSearchMemo(value);
   };
 
   const handleSuggestionClick = (course: any) => {

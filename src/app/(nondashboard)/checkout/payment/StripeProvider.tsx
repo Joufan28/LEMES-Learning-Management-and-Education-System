@@ -71,4 +71,4 @@ const StripeProvider: React.FC<StripeProviderProps> = ({ children }) => {
   );
 };
 
-export default StripeProvider;
+export default StripeProvider; 
