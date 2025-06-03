@@ -12,6 +12,7 @@ import Loading from "@/components/Loading";
 import { useCourseProgressData } from "@/hooks/useCourseProgressData";
 import { useSearchParams } from "next/navigation";
 import { useEffect } from "react";
+import type { Chapter, Section } from "@/lib/schemas"; // Import Chapter and Section from schemas.ts
 
 const Course = () => {
   const { user, course, userProgress, currentSection, currentChapter, isLoading } = useCourseProgressData();
@@ -69,6 +70,12 @@ const Course = () => {
 
   console.log("Rendering course content...");
   console.log("Course object structure for debugging:", course);
+
+  // Ensure course is of type Course before accessing its properties
+  if (!course || Array.isArray(course) || typeof course !== 'object') {
+      console.error("Unexpected state: course is not a valid Course object.", course);
+      return <div>Error: Invalid course data received.</div>; // Or handle this state appropriately
+  }
 
   return (
     <div className="course">  

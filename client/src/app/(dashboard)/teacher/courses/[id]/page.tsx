@@ -5,7 +5,7 @@ import DroppableComponent from "@/app/(dashboard)/teacher/courses/[id]/Droppable
 import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
-import { courseSchema, Section, Chapter, CourseFormData } from "@/lib/schemas";
+import type { Section, Chapter, CourseFormData, Course } from "@/lib/schemas";
 import { centsToDollars, createCourseFormData } from "@/lib/utils";
 import { openSectionModal, setSections } from "@/state";
 import { useGetCourseQuery, useUpdateCourseMutation } from "@/state/api";
@@ -17,6 +17,7 @@ import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import ChapterModal from "./ChapterModal";
 import SectionModal from "./SectionModal";
+import { courseSchema } from "@/lib/schemas";
 
 const CourseEditor = () => {
   const router = useRouter();
@@ -32,7 +33,7 @@ const CourseEditor = () => {
   const dispatch = useAppDispatch();
   const { sections } = useAppSelector((state) => state.global.courseEditor);
 
-  const methods = useForm<CourseFormData>({
+  const methods = useForm({
     resolver: zodResolver(courseSchema),
     defaultValues: {
       courseTitle: "",
@@ -48,7 +49,7 @@ const CourseEditor = () => {
   useEffect(() => {
     console.log("Effect triggered with course data:", courseData);
     if (courseData?.data && !isLoading) {
-      const course = courseData.data;
+      const course: Course = courseData.data;
       console.log("Resetting form with course data:", {
         title: course.title,
         description: course.description,
@@ -64,8 +65,8 @@ const CourseEditor = () => {
         courseDescription: course.description || "",
         courseCategory: course.category || "",
         coursePrice: centsToDollars(course.price || 0).toString(),
+        sections: Array.isArray(course.sections) ? course.sections : [],
         courseStatus: course.status === "Published",
-        sections: course.sections || [],
         image: course.image || "",
       });
       

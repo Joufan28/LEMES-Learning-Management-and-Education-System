@@ -9,6 +9,12 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import Image from "next/image";
 import { formatPrice } from "@/lib/utils";
 
+// Assuming CourseCardProps interface is defined elsewhere or needs to be defined here
+interface CourseCardProps {
+  course: any; // Consider defining a proper type for course
+  onGoToCourse: (course: any) => void; // Adjust type based on course
+}
+
 const CourseCard = ({ course, onGoToCourse }: CourseCardProps) => {
   return (
     <Card className="course-card group" onClick={() => onGoToCourse(course)}>
@@ -40,6 +46,7 @@ const CourseCard = ({ course, onGoToCourse }: CourseCardProps) => {
           </p>
         </div>
 
+        {/* CardFooter is typically outside CardContent, but following your structure */}
         <CardFooter className="course-card__footer">
           <div className="course-card__category">{course.category}</div>
           <span className="course-card__price">

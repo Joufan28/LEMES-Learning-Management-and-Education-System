@@ -4,7 +4,10 @@ import { formatPrice } from "@/lib/utils";
 import React from "react";
 import { useUser } from "@clerk/nextjs";
 import { useGetUserEnrolledCoursesQuery } from "@/state/api";
-import { Course } from "@/types";
+import { motion } from "framer-motion";
+import { Clock, Users, BookOpen, ArrowRight } from "lucide-react";
+import type { Course } from "@/lib/schemas";
+import { useRouter, useSearchParams } from "next/navigation";
 
 interface SelectedCourseProps {
   course: Course;
@@ -15,6 +18,9 @@ const SelectedCourse: React.FC<SelectedCourseProps> = ({ course, handleEnrollNow
   const { user, isLoaded } = useUser();
   const userId = user?.id;
   const userRole = user?.publicMetadata?.userType as "student" | "teacher" | undefined;
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const id = searchParams.get("id");
 
   const { data: enrolledCoursesData, isLoading: isLoadingEnrolledCourses } = useGetUserEnrolledCoursesQuery(userId as string, {
     skip: !userId || !isLoaded
@@ -22,11 +28,25 @@ const SelectedCourse: React.FC<SelectedCourseProps> = ({ course, handleEnrollNow
   const enrolledCourses = enrolledCoursesData?.data || [];
 
   const isOwnedByTeacher = userRole === "teacher" && course.teacherId === userId;
-  const isAlreadyEnrolled = enrolledCourses.some((enrolledCourse: Course) => enrolledCourse.courseId === course.courseId);
+  const isAlreadyEnrolled = enrolledCourses.some((enrolledCourse) => enrolledCourse.courseId === course.courseId);
   const disableEnroll = isOwnedByTeacher || isAlreadyEnrolled;
+
+  const handleBackToSearch = () => {
+    router.push('/search');
+  };
 
   return (
     <div className="selected-course">
+      {id && (
+        <Button
+          variant="link"
+          onClick={handleBackToSearch}
+          className="mb-4 p-0 text-primary-700 hover:text-primary-600"
+        >
+          ← Back to All Courses
+        </Button>
+      )}
+
       <div>
         <h3 className="selected-course__title">{course.title}</h3>
         <p className="selected-course__author">

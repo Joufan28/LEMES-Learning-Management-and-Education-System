@@ -9,6 +9,7 @@ import CourseCardSearch from "@/components/CourseCardSearch";
 import SelectedCourse from "./SelectedCourse";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, Search as SearchIcon } from "lucide-react";
+import type { Course } from "@/lib/schemas";
 
 const Search = () => {
   const searchParams = useSearchParams();
@@ -16,7 +17,7 @@ const Search = () => {
   const source = searchParams.get("source");
   const tagQuery = searchParams.get("q");
   const { data, isLoading, isError } = useGetCoursesQuery({});
-  const courses = data?.data ?? [];
+  const courses = useMemo(() => data?.data ?? [], [data?.data]);
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");

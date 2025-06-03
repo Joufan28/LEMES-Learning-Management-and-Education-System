@@ -18,7 +18,7 @@ const CheckoutDetailsPage = () => {
   const { course, isLoading, isError } = useCurrentCourse();
   const searchParams = useSearchParams();
   const showSignUp = searchParams.get("showSignUp") === "true";
-  const selectedCourse = course?.data ?? [];
+  const selectedCourse = course?.data;
 
   const methods = useForm<GuestFormData>({
     resolver: zodResolver(guestSchema),

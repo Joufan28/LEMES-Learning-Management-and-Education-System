@@ -4,6 +4,7 @@ import { Appearance, loadStripe, StripeElementsOptions } from "@stripe/stripe-js
 import { useCreateStripePaymentIntentMutation } from "@/state/api";
 import { useCurrentCourse } from "@/hooks/useCurrentCourse";
 import Loading from "@/components/Loading";
+import { toast } from "sonner";
 
 if (!process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY) {
   throw new Error("NEXT_PUBLIC_STRIPE_PUBLIC_KEY is not set");
@@ -26,31 +27,43 @@ const appearance: Appearance = {
   },
 };
 
-const StripeProvider = ({ children }: { children: React.ReactNode }) => {
+interface StripeProviderProps {
+    children: React.ReactNode;
+    courseId: string;
+}
+
+const StripeProvider: React.FC<StripeProviderProps> = ({ children, courseId }) => {
   const [clientSecret, setClientSecret] = useState<string | "">("");
   const [createStripePaymentIntent] = useCreateStripePaymentIntentMutation();
-  const { course } = useCurrentCourse();
 
   useEffect(() => {
-    if (!course) return;
-    console.log("Fetched course object:", course);
+    if (!courseId) {
+        console.error("StripeProvider: courseId is missing");
+        return;
+    }
+    console.log("StripeProvider: Fetching payment intent for courseId", courseId);
     const fetchPaymentIntent = async () => {
-      const result = await createStripePaymentIntent({
-        amount: course?.data?.price ?? 50,
-      }).unwrap();
+      try {
+          const result = await createStripePaymentIntent({
+            courseId: courseId
+          }).unwrap();
 
-      setClientSecret(result.clientSecret);
+          setClientSecret(result.clientSecret);
+      } catch (error) {
+          console.error("Failed to create payment intent:", error);
+          toast.error("Failed to initialize payment. Please try again.");
+      }
     };
 
     fetchPaymentIntent();
-  }, [createStripePaymentIntent, course?.data?.price, course]);
+  }, [createStripePaymentIntent, courseId]);
 
   const options: StripeElementsOptions = {
     clientSecret,
     appearance,
   };
 
-  console.log("Client Secret", clientSecret);
+  console.log("StripeProvider Client Secret:", clientSecret);
 
   if (!clientSecret) return <Loading />;
 

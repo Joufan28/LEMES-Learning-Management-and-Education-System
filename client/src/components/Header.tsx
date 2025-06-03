@@ -1,4 +1,10 @@
-import React from "react";
+import React, { ReactNode } from "react";
+
+interface HeaderProps {
+  title: string;
+  subtitle: string;
+  rightElement?: ReactNode;
+}
 
 const Header = ({ title, subtitle, rightElement }: HeaderProps) => {
   return (
@@ -7,7 +13,7 @@ const Header = ({ title, subtitle, rightElement }: HeaderProps) => {
         <h1 className="header__title">{title}</h1>
         <p className="header__subtitle">{subtitle}</p>
       </div>
-      {rightElement && <div>{rightElement}</div>}
+      {rightElement && <div className="header__right">{rightElement}</div>}
     </div>
   );
 };

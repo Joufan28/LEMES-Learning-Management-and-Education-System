@@ -1,11 +1,22 @@
-import { formatPrice } from "@/lib/utils";
-import Image from "next/image";
 import React from "react";
+import { formatPrice } from "@/lib/utils";
 import AccordionSections from "./AccrodionSections";
+import type { Course } from "@/lib/schemas";
+import Image from "next/image";
+
+interface CoursePreviewProps {
+  course: Course;
+}
 
 const CoursePreview = ({ course }: CoursePreviewProps) => {
-  console.log("Course data in CoursePreview:", course);
-  const price = formatPrice(course.price);
+  console.log("CoursePreview - Received course prop:", course);
+  console.log("CoursePreview - course.image:", course?.image);
+  const price = course?.price !== undefined ? formatPrice(course.price) : '$0.00';
+
+  if (!course) {
+    return <div>Loading course preview...</div>;
+  }
+
   return (
     <div className="course-preview">
       <div className="course-preview__container">

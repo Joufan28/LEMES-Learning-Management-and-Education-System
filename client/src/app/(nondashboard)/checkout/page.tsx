@@ -16,6 +16,8 @@ const CheckoutWizard = () => {
   const searchParams = useSearchParams();
   console.log("CheckoutWizard - URL searchParams:", searchParams.toString());
 
+  const courseId = searchParams.get("id");
+
   if (!isLoaded) return <Loading />;
 
   const renderStep = () => {

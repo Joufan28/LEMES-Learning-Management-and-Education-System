@@ -1,4 +1,10 @@
-import React from "react";
+import React, { ReactNode } from "react";
+
+interface CustomFixedModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  children: ReactNode;
+}
 
 const CustomModal = ({ isOpen, onClose, children }: CustomFixedModalProps) => {
   if (!isOpen) return null;

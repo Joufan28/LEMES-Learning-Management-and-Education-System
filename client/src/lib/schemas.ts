@@ -23,7 +23,28 @@ export const courseSchema = z.object({
   })).default([]),
 });
 
-export type CourseFormData = z.infer<typeof courseSchema>;
+// Explicitly define CourseFormData to ensure correct type for sections and chapters
+export interface CourseFormData {
+  courseTitle: string;
+  courseDescription?: string;
+  courseCategory: string;
+  coursePrice: string;
+  courseStatus: boolean;
+  image?: string | File;
+  sections: Array<{
+    sectionId: string;
+    sectionTitle: string;
+    sectionDescription?: string;
+    chapters: Array<{
+      chapterId: string;
+      title: string;
+      content: string;
+      video?: string | File;
+      quizQuestions?: string[];
+      resourceLinks?: string[];
+    }>;
+  }>;
+}
 
 // Chapter Schemas
 export const chapterSchema = z.object({
@@ -49,6 +70,12 @@ export interface Chapter {
   resourceLinks?: string[];
 }
 
+// Define ChapterProgress type
+export interface ChapterProgress {
+  chapterId: string;
+  completed: boolean;
+}
+
 // Section Schemas
 export const sectionSchema = z.object({
   sectionId: z.string(),
@@ -60,10 +87,22 @@ export const sectionSchema = z.object({
     video: z.union([z.string(), z.instanceof(File)]).optional(),
     quizQuestions: z.array(z.string()).optional(),
     resourceLinks: z.array(z.string()).optional(),
-  })).default([]),
+  })),
 });
 
-export type SectionFormData = z.infer<typeof sectionSchema>;
+// Explicitly define SectionFormData to ensure chapters is a required array
+export interface SectionFormData {
+  sectionId: string;
+  sectionTitle: string;
+  sectionDescription?: string;
+  chapters: Array<{
+    title: string;
+    content: string;
+    video?: string | File;
+    quizQuestions?: string[];
+    resourceLinks?: string[];
+  }>;
+}
 
 // Define the full Section type
 export interface Section {
@@ -91,3 +130,46 @@ export const notificationSettingsSchema = z.object({
 export type NotificationSettingsFormData = z.infer<
   typeof notificationSettingsSchema
 >;
+
+export interface Course {
+  courseId: string;
+  teacherId: string;
+  teacherName: string;
+  teacherBio?: string;
+  teacherJob?: string;
+  teacherImageUrl?: string;
+  title: string;
+  description: string;
+  category: string;
+  image?: string;
+  price: number;
+  level: string;
+  status: "Published" | "Draft";
+  sections: Section[];
+  enrollments: { userId: string }[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Transaction {
+  userId: string;
+  transactionId: string;
+  dateTime: string;
+  courseId: string;
+  paymentProvider: "stripe";
+  paymentMethodId?: string;
+  amount: number; // Stored in cents
+  savePaymentMethod?: boolean;
+}
+
+export interface UserCourseProgress {
+  userId: string;
+  courseId: string;
+  sections: Array<{
+    sectionId: string;
+    chapters: Array<{
+      chapterId: string;
+      completed: boolean;
+    }>;
+  }>;
+}

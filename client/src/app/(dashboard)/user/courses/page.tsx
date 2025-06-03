@@ -20,7 +20,7 @@ const Courses = () => {
     skip: !isLoaded || !user,
   });
 
-  const courses = data?.data || [];
+  const courses = useMemo(() => data?.data || [], [data?.data]);
 
   // Ekstrak kategori yang tersedia dari data kursus dengan penanganan null-safe
   useEffect(() => {
@@ -29,7 +29,7 @@ const Courses = () => {
 
       courses.forEach((course) => {
         // Gunakan kategori dari berbagai kemungkinan properti
-        const category = course.category || course.categoryName || "";
+        const category = course.category || "";
         if (category) {
           uniqueCategories.add(category);
         }
@@ -51,7 +51,7 @@ const Courses = () => {
       const matchesSearch = normalizedSearch ? title.toLowerCase().includes(normalizedSearch) : true;
 
       // Ambil kategori dari berbagai sumber
-      const courseCategory = course.category || course.categoryName || "";
+      const courseCategory = course.category || "";
       const normalizedCategory = courseCategory.toLowerCase();
 
       const matchesCategory = selectedCategory === "all" ? true : normalizedCategory === selectedCategory.toLowerCase();
@@ -118,7 +118,7 @@ const Courses = () => {
     <div className="user-courses container">
       <Header title="My Learning" subtitle="Your enrolled courses" />
 
-      <Toolbar onSearch={setSearchTerm} onCategoryChange={setSelectedCategory} categories={availableCategories} selectedCategory={selectedCategory} />
+      <Toolbar onSearch={setSearchTerm} onCategoryChange={setSelectedCategory} categories={availableCategories} selectedCategory={selectedCategory} searchValue={searchTerm} />
 
       {filteredCourses.length === 0 ? (
         <div className="text-center py-12">

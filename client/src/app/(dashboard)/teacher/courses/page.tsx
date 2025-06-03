@@ -28,7 +28,7 @@ const Courses = () => {
   const router = useRouter();
   const { user } = useUser();
   const { data: coursesData, isLoading, isError } = useGetCoursesQuery({});
-  const courses = coursesData?.data || [];
+  const courses = useMemo(() => coursesData?.data || [], [coursesData?.data]);
 
   const [createCourse] = useCreateCourseMutation();
   const [deleteCourse] = useDeleteCourseMutation();
@@ -41,13 +41,11 @@ const Courses = () => {
   useEffect(() => {
     if (courses.length > 0) {
       const uniqueCategories = new Set<string>();
-
       courses.forEach((course: Course) => {
         if (course.category) {
           uniqueCategories.add(course.category);
         }
       });
-
       setAvailableCategories(["all", ...Array.from(uniqueCategories)]);
     }
   }, [courses]);
@@ -95,7 +93,7 @@ const Courses = () => {
       teacherJob: metadata?.job || "",
     }).unwrap();
 
-    router.push(`/teacher/courses/${result.courseId}`);
+    // router.push(`/teacher/courses/${result.courseId}`);
   };
 
   const handleViewCourse = (course: Course) => {

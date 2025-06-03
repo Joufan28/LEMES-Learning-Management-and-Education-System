@@ -7,7 +7,7 @@ const customBaseQuery = async (args: string | FetchArgs, api: BaseQueryApi, extr
   const baseQuery = fetchBaseQuery({
     baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL,
     prepareHeaders: async (headers) => {
-      const token = await window.Clerk?.session?.getToken();
+      const token = await (window as any).Clerk?.session?.getToken();
       if (token) {
         headers.set("Authorization", `Bearer ${token}`);
       }
@@ -70,7 +70,7 @@ export const api = createApi({
       providesTags: ["Courses"],
     }),
 
-    getCourse: build.query<Course, string>({
+    getCourse: build.query<{ data: Course }, string>({
       query: (id) => `courses/${id}`,
       providesTags: (result, error, id) => [{ type: "Courses", id }],
     }),
@@ -156,7 +156,7 @@ export const api = createApi({
       providesTags: ["Courses", "UserCourseProgress"],
     }),
 
-    getUserCourseProgress: build.query<UserCourseProgress, { userId: string; courseId: string }>({
+    getUserCourseProgress: build.query<{ data: UserCourseProgress }, { userId: string; courseId: string }>({
       query: ({ userId, courseId }) => `users/course-progress/${userId}/courses/${courseId}`,
       providesTags: ["UserCourseProgress"],
     }),

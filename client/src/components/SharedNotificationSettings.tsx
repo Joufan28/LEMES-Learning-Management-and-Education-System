@@ -14,6 +14,18 @@ import { Form } from "@/components/ui/form";
 import { CustomFormField } from "./CustomFormField";
 import { Button } from "@/components/ui/button";
 
+interface UserSettings {
+  courseNotifications?: boolean;
+  emailAlerts?: boolean;
+  smsAlerts?: boolean;
+  notificationFrequency?: "immediate" | "daily" | "weekly";
+}
+
+interface SharedNotificationSettingsProps {
+  title?: string;
+  subtitle?: string;
+}
+
 const SharedNotificationSettings = ({
   title = "Notification Settings",
   subtitle = "Manage your notification settings",

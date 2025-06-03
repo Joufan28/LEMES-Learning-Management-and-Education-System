@@ -5,16 +5,7 @@ import { cn } from "@/lib/utils";
 import { useSidebar } from "@/components/ui/sidebar";
 import Loading from "@/components/Loading";
 import { useCourseProgressData } from "@/hooks/useCourseProgressData";
-
-// Define types locally for now as importing from @/types is causing issues
-interface Chapter {
-  chapterId: string;
-  title: string;
-  content: string;
-  video?: string | File;
-  freePreview?: boolean;
-  type: "Text" | "Quiz" | "Video";
-}
+import type { Chapter, ChapterProgress } from "@/lib/schemas";
 
 interface SectionType {
   sectionId: string;
@@ -28,11 +19,6 @@ interface CourseType {
   title: string;
   sections: SectionType[];
   // Add other necessary fields from Course type
-}
-
-interface ChapterProgress {
-  chapterId: string;
-  completed: boolean;
 }
 
 interface SectionProgressType {
@@ -77,6 +63,12 @@ const ChaptersSidebar: React.FC<ChaptersSidebarProps> = ({ isViewAsTeacher, user
 
   if (!course) {
     return <div>Error loading course content</div>;
+  }
+
+  // Add explicit check to ensure course is a valid object before accessing properties
+  if (Array.isArray(course) || typeof course !== 'object') {
+      console.error("Unexpected state: course in ChaptersSidebar is not a valid Course object.", course);
+      return <div>Error: Invalid course data in sidebar.</div>; // Handle this state appropriately
   }
 
   const toggleSection = (sectionTitle: string) => {

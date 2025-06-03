@@ -11,6 +11,7 @@ import {
   openSectionModal,
   openChapterModal,
 } from "@/state";
+import type { Section, Chapter } from "@/lib/schemas";
 
 export default function DroppableComponent() {
   const dispatch = useAppDispatch();

@@ -2,7 +2,8 @@ import { CustomFormField } from "@/components/CustomFormField";
 import CustomModal from "@/components/CustomModal";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
-import { SectionFormData, sectionSchema } from "@/lib/schemas";
+import type { SectionFormData, Section, Chapter } from "@/lib/schemas";
+import { sectionSchema } from "@/lib/schemas";
 import { addSection, closeSectionModal, editSection } from "@/state";
 import { useAppDispatch, useAppSelector } from "@/state/redux";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -51,13 +52,33 @@ const SectionModal = () => {
   };
 
   const onSubmit = (data: SectionFormData) => {
+    // Transform SectionFormData to Section type before dispatching
+    const sectionToDispatch: Section = {
+      ...data,
+      chapters: data.chapters.map(chapter => {
+        // Determine chapter type based on available data
+        let type: "Text" | "Quiz" | "Video" = "Text";
+        if (chapter.video) {
+          type = "Video";
+        } else if (chapter.quizQuestions && chapter.quizQuestions.length > 0) {
+          type = "Quiz";
+        }
+        
+        return {
+          chapterId: uuidv4(), // Generate a new ID for each chapter
+          type: type,
+          ...chapter,
+        };
+      })
+    };
+
     if (selectedSectionIndex === null) {
-      dispatch(addSection(data));
+      dispatch(addSection(sectionToDispatch));
     } else {
       dispatch(
         editSection({
           index: selectedSectionIndex,
-          section: data,
+          section: sectionToDispatch,
         })
       );
     }

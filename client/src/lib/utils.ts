@@ -3,7 +3,7 @@ import { twMerge } from "tailwind-merge";
 import * as z from "zod";
 import { api } from "../state/api";
 import { toast } from "sonner";
-import { Chapter, Section, CourseFormData } from "./schemas";
+import type { Chapter, Section, CourseFormData } from "./schemas";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -295,7 +295,9 @@ export const createCourseFormData = (
 ): FormData => {
   const formData = new FormData();
   formData.append("title", data.courseTitle);
-  formData.append("description", data.courseDescription);
+  if (data.courseDescription) {
+    formData.append("description", data.courseDescription);
+  }
   formData.append("category", data.courseCategory);
   formData.append("price", data.coursePrice.toString());
   formData.append("status", data.courseStatus ? "Published" : "Draft");

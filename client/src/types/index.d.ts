@@ -22,9 +22,9 @@ declare global {
     email: string;
     publicMetadata: {
       userType: "teacher" | "student";
+      settings?: UserSettings;
     };
     privateMetadata: {
-      settings?: UserSettings;
       paymentMethods?: Array<PaymentMethod>;
       defaultPaymentMethodId?: string;
       stripeCustomerId?: string;
@@ -106,11 +106,15 @@ declare global {
 
   interface Chapter {
     chapterId: string;
+    type: "Text" | "Quiz" | "Video";
     title: string;
     content: string;
+    comments?: any[];
     video?: string | File;
+    videoFile?: { name: string; type: string; size: number };
+    quizQuestions?: string[];
+    resourceLinks?: string[];
     freePreview?: boolean;
-    type: "Text" | "Quiz" | "Video";
   }
 
   interface ChapterProgress {

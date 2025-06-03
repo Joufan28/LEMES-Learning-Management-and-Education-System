@@ -29,7 +29,7 @@ const NonDashboardNavbar = () => {
   // Get all courses for search suggestions
   const { data: coursesData } = useGetCoursesQuery({});
 
-  const courses = enrolledCoursesData?.data || [];
+  const courses = useMemo(() => enrolledCoursesData?.data || [], [enrolledCoursesData?.data]);
 
   // Filter untuk menampilkan hanya 5 kursus terbaru
   const latestCourses = useMemo(() => {
@@ -53,7 +53,7 @@ const NonDashboardNavbar = () => {
         setShowSuggestions(false);
       }
     }, 300),
-    [coursesData]
+    [coursesData?.data] // eslint-disable-line react-hooks/exhaustive-deps
   );
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {

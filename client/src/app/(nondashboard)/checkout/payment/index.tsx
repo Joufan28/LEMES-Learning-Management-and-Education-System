@@ -1,14 +1,84 @@
-import React from "react";
-import StripeProvider from "./StripeProvider";
-import { PaymentElement, useElements, useStripe } from "@stripe/react-stripe-js";
-import { useCheckoutNavigation } from "@/hooks/useCheckoutNavigation";
+"use client";
+
+import React, { useEffect, useState } from "react";
+import { Elements } from "@stripe/react-stripe-js";
+import { Appearance, loadStripe, StripeElementsOptions } from "@stripe/stripe-js";
+import { useCreateStripePaymentIntentMutation } from "@/state/api";
 import { useCurrentCourse } from "@/hooks/useCurrentCourse";
-import { useClerk, useUser } from "@clerk/nextjs";
+import Loading from "@/components/Loading";
+import { toast } from "sonner";
+import { useSearchParams } from "next/navigation";
+import { useCreateTransactionMutation } from "@/state/api";
+import { useUser } from "@clerk/nextjs";
+import { useClerk } from "@clerk/nextjs";
 import CoursePreview from "@/components/CoursePreview";
 import { CreditCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useCreateTransactionMutation } from "@/state/api";
-import { toast } from "sonner";
+import { Transaction } from "@/lib/schemas";
+import { useCheckoutNavigation } from "@/hooks/useCheckoutNavigation";
+
+import { PaymentElement, useElements, useStripe } from "@stripe/react-stripe-js";
+
+if (!process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY) {
+  throw new Error("NEXT_PUBLIC_STRIPE_PUBLIC_KEY is not set");
+}
+
+const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY);
+
+const appearance: Appearance = {
+  theme: "stripe",
+  variables: {
+    colorPrimary: "#0570de",
+    colorBackground: "#18181b",
+    colorText: "#d2d2d2",
+    colorDanger: "#df1b41",
+    colorTextPlaceholder: "#2f2b2b",
+    fontFamily: "Inter, system-ui, sans-serif",
+    spacingUnit: "3px",
+    borderRadius: "10px",
+    fontSizeBase: "14px",
+  },
+};
+
+const StripeProvider = ({ children }: { children: React.ReactNode }) => {
+  const [clientSecret, setClientSecret] = useState<string | "">("");
+  const [createStripePaymentIntent] = useCreateStripePaymentIntentMutation();
+  const { course } = useCurrentCourse();
+
+  useEffect(() => {
+    if (!course) return;
+    console.log("Fetched course object:", course);
+    const fetchPaymentIntent = async () => {
+      try {
+        const result = await createStripePaymentIntent({
+          amount: course?.data?.price ?? 50,
+        }).unwrap();
+
+        setClientSecret(result.clientSecret);
+      } catch (error) {
+        console.error("Failed to create payment intent:", error);
+        toast.error("Failed to initialize payment. Please try again.");
+      }
+    };
+
+    fetchPaymentIntent();
+  }, [createStripePaymentIntent, course?.data?.price, course]);
+
+  const options: StripeElementsOptions = {
+    clientSecret,
+    appearance,
+  };
+
+  console.log("StripeProvider Client Secret:", clientSecret);
+
+  if (!clientSecret) return <Loading />;
+
+  return (
+    <Elements stripe={stripePromise} options={options} key={clientSecret}>
+      {children}
+    </Elements>
+  );
+};
 
 const PaymentPageContent = () => {
   const stripe = useStripe();
@@ -18,6 +88,9 @@ const PaymentPageContent = () => {
   const { course, courseId } = useCurrentCourse();
   const { user } = useUser();
   const { signOut } = useClerk();
+
+  console.log("PaymentPageContent - Course Data:", course);
+  console.log("PaymentPageContent - course?.data:", course?.data);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,6 +127,8 @@ const PaymentPageContent = () => {
 
       await createTransaction(transactionData);
       navigateToStep(3);
+    } else if (result.error) {
+      toast.error(result.error.message || "Payment confirmation failed.");
     }
   };
 
@@ -62,17 +137,15 @@ const PaymentPageContent = () => {
     navigateToStep(1);
   };
 
-  if (!course?.data) return null;
+  if (!course?.data) return <Loading />;
 
   return (
     <div className="payment">
       <div className="payment__container">
-        {/* Order Summary */}
         <div className="payment__preview">
           <CoursePreview course={course?.data} />
         </div>
 
-        {/* Pyament Form */}
         <div className="payment__form-container">
           <form id="payment-form" onSubmit={handleSubmit} className="border border-blue-200 payment__form">
             <div className="payment__content">
@@ -93,19 +166,17 @@ const PaymentPageContent = () => {
                 </div>
               </div>
             </div>
+            <div className="payment__actions p-6">
+              <Button className="hover:bg-white-50/10" onClick={handleSignOutAndNavigate} variant="outline" type="button">
+                Switch Account
+              </Button>
+
+              <Button form="payment-form" type="submit" className="payment__submit" disabled={!stripe || !elements}>
+                Pay with Credit Card
+              </Button>
+            </div>
           </form>
         </div>
-      </div>
-
-      {/* Navigation Buttons */}
-      <div className="payment__actions">
-        <Button className="hover:bg-white-50/10" onClick={handleSignOutAndNavigate} variant="outline" type="button">
-          Switch Account
-        </Button>
-
-        <Button form="payment-form" type="submit" className="payment__submit" disabled={!stripe || !elements}>
-          Pay with Credit Card
-        </Button>
       </div>
     </div>
   );
