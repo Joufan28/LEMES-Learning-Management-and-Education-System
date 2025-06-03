@@ -166,16 +166,17 @@ const PaymentPageContent = () => {
                 </div>
               </div>
             </div>
-            <div className="payment__actions p-6">
-              <Button className="hover:bg-white-50/10" onClick={handleSignOutAndNavigate} variant="outline" type="button">
-                Switch Account
-              </Button>
-
-              <Button form="payment-form" type="submit" className="payment__submit" disabled={!stripe || !elements}>
-                Pay with Credit Card
-              </Button>
-            </div>
           </form>
+          {/* Navigation Buttons */}
+          <div className="payment__actions flex justify-between items-center">
+            <Button className="hover:bg-white-50/10" onClick={handleSignOutAndNavigate} variant="outline" type="button">
+              Switch Account
+            </Button>
+
+            <Button form="payment-form" type="submit" className="payment__submit" disabled={!stripe || !elements}>
+              Pay with Credit Card
+            </Button>
+          </div>
         </div>
       </div>
     </div>

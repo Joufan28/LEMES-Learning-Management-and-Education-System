@@ -12,10 +12,7 @@
     "price": 4999,
     "level": "Beginner",
     "status": "Published",
-    "enrollments": [
-      { "userId": "user_2ntu96pUCljUV2T9W0AThzjacQB" },
-      { "userId": "user_9xWp45MnKjL8vRt2Hs6BqDcEy" }
-    ],
+    "enrollments": [{ "userId": "user_2ntu96pUCljUV2T9W0AThzjacQB" }, { "userId": "user_9xWp45MnKjL8vRt2Hs6BqDcEy" }],
     "sections": [
       {
         "sectionId": "2f9d1e8b-5a3c-4b7f-9e6d-8c2a1f0b3d5e",
@@ -122,14 +119,11 @@
     "title": "Advanced Machine Learning",
     "description": "Dive deep into machine learning algorithms and techniques.",
     "category": "Artificial Intelligence",
-    "image": "https://images.pexels.com/photos/6303596/pexels-photo-6303596.jpeg",
+    "image": "https://images.pexels.com/photos/9242275/pexels-photo-9242275.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
     "price": 9999,
     "level": "Advanced",
     "status": "Published",
-    "enrollments": [
-      { "userId": "user_2ntu96pUCljUV2T9W0AThzjacQB" },
-      { "userId": "user_5vBn23WsLkMp7Jh4Gt8FxYcRz" }
-    ],
+    "enrollments": [{ "userId": "user_2ntu96pUCljUV2T9W0AThzjacQB" }, { "userId": "user_5vBn23WsLkMp7Jh4Gt8FxYcRz" }],
     "sections": [
       {
         "sectionId": "1a7b3c5d-9e2f-4g6h-8i0j-2k4l6m8n0p1q",
@@ -242,10 +236,7 @@
     "price": 7999,
     "level": "Beginner",
     "status": "Published",
-    "enrollments": [
-      { "userId": "user_6tHm89QwNpKj3Fx5Vy2RdLcBs" },
-      { "userId": "user_9xWp45MnKjL8vRt2Hs6BqDcEy" }
-    ],
+    "enrollments": [{ "userId": "user_6tHm89QwNpKj3Fx5Vy2RdLcBs" }, { "userId": "user_9xWp45MnKjL8vRt2Hs6BqDcEy" }],
     "sections": [
       {
         "sectionId": "3e5f7g9h-1i3j-5k7l-9m1n-3o5p7q9r1s3t",
@@ -349,9 +340,7 @@
     "price": 6999,
     "level": "Intermediate",
     "status": "Published",
-    "enrollments": [
-      { "userId": "user_5vBn23WsLkMp7Jh4Gt8FxYcRz" }
-    ],
+    "enrollments": [{ "userId": "user_5vBn23WsLkMp7Jh4Gt8FxYcRz" }],
     "sections": [
       {
         "sectionId": "6h8j0l2n-4p6r-8t0v-2x4z-6a8c0e2g4i6k",
@@ -408,8 +397,8 @@
         ]
       }
     ]
-          },
-          {
+  },
+  {
     "courseId": "f3g4h5i6-j7k8-4d9e-0f1g-2h3i4j5k6l7m",
     "teacherId": "user_6tHm89QwNpKj3Fx5Vy2RdLcBs",
     "teacherName": "Bob Williams",
@@ -418,7 +407,7 @@
     "title": "Digital Marketing Essentials",
     "description": "Master the core concepts of digital marketing, including SEO, social media, and email marketing.",
     "category": "Marketing",
-    "image": "https://images.pexels.com/photos/7361888/pexels-photo-7361888.jpeg",
+    "image": "https://images.pexels.com/photos/590016/pexels-photo-590016.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
     "price": 8999,
     "level": "Beginner",
     "status": "Published",
@@ -466,6 +455,87 @@
             "title": "Brush Techniques",
             "content": "https://example.com/videos/brush-techniques.mp4",
             "video": "https://example.com/videos/brush-techniques.mp4",
+            "comments": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "courseId": "9c8b7a6d-5e4f-3d2c-1b0a-9c8b7a6d5e4f",
+    "teacherId": "user_7gHk32BvXsMz5Lp8Jd0WnQaTY",
+    "teacherName": "Michael Lee",
+    "teacherBio": "Full-stack developer and cloud computing specialist with a passion for scalable systems.",
+    "teacherJob": "Software Engineer",
+    "title": "Full-Stack Web Development with Go and React",
+    "description": "Build modern web applications using Go for the backend and React for the frontend.",
+    "category": "Web Development",
+    "image": "https://images.pexels.com/photos/1181676/pexels-photo-1181676.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+    "price": 9999,
+    "level": "Intermediate",
+    "status": "Published",
+    "enrollments": [{ "userId": "user_8dGk47xNzLyV2Jh6Mp3FtWuZcA" }, { "userId": "user_3xTy14MnFgPz7Vr5Bs9LpDweKq" }],
+    "sections": [
+      {
+        "sectionId": "4d1e2f3g-5h6i-7j8k-9l0m-1n2o3p4q5r6s",
+        "sectionTitle": "Getting Started with Go",
+        "sectionDescription": "Learn the fundamentals of Go and how to build web servers.",
+        "chapters": [
+          {
+            "chapterId": "l3m4n5o6-p7q8-r9s0-t1u2-v3w4x5y6z7a8",
+            "type": "Video",
+            "title": "Installing Go and Writing Your First Program",
+            "content": "https://example.com/videos/go-install.mp4",
+            "videoLength": 900,
+            "comments": [],
+            "videoUrl": "https://example.com/videos/go-install.mp4",
+            "videoUniqueId": "vid_007",
+            "videoType": "mp4"
+          },
+          {
+            "chapterId": "m4n5o6p7-q8r9-s0t1-u2v3-w4x5y6z7a8b9",
+            "type": "Text",
+            "title": "Go Syntax Overview",
+            "content": "Go has a simple and clean syntax. Here's an overview of variables, control structures, and functions...",
+            "comments": []
+          },
+          {
+            "chapterId": "n5o6p7q8-r9s0-t1u2-v3w4-x5y6z7a8b9c0",
+            "type": "Quiz",
+            "title": "Go Basics Quiz",
+            "content": "1. What is a goroutine?\n2. How do you define a function in Go?\n3. What does the `:=` operator do?",
+            "comments": []
+          }
+        ]
+      },
+      {
+        "sectionId": "5e6f7g8h-9i0j-1k2l-3m4n-5o6p7q8r9s0t",
+        "sectionTitle": "React Frontend Essentials",
+        "sectionDescription": "Understand the core concepts of React and component-based architecture.",
+        "chapters": [
+          {
+            "chapterId": "o6p7q8r9-s0t1-u2v3-w4x5-y6z7a8b9c0d1",
+            "type": "Video",
+            "title": "React Components and JSX",
+            "content": "https://example.com/videos/react-components.mp4",
+            "videoLength": 1100,
+            "comments": [],
+            "videoUrl": "https://example.com/videos/react-components.mp4",
+            "videoUniqueId": "vid_008",
+            "videoType": "hls"
+          },
+          {
+            "chapterId": "p7q8r9s0-t1u2-v3w4-x5y6-z7a8b9c0d1e2",
+            "type": "Text",
+            "title": "Props and State in React",
+            "content": "Props and state are essential concepts in React. Props allow you to pass data, while state allows your component to be dynamic...",
+            "comments": []
+          },
+          {
+            "chapterId": "q8r9s0t1-u2v3-w4x5-y6z7-a8b9c0d1e2f3",
+            "type": "Quiz",
+            "title": "React Basics Quiz",
+            "content": "1. What is the difference between props and state?\n2. How do you handle user input in React?\n3. What is the purpose of `useEffect`?",
             "comments": []
           }
         ]
