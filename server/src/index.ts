@@ -40,7 +40,7 @@ app.use(morgan("common"));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 // Configure CORS to allow credentials from specific origin
-app.use(cors({ origin: 'http://localhost:3000', credentials: true }));
+app.use(cors({ origin: "https://lemes-learning-management-and-educa-delta.vercel.app/", credentials: true }));
 app.use(clerkMiddleware());
 
 // Log Clerk related information
